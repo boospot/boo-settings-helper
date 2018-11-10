@@ -23,6 +23,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		public $config_menu = array();
 
 		public $field_types = array();
+
+		protected $is_tabs = false;
 		/**
 		 * settings sections array
 		 *
@@ -57,10 +59,31 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		}
 
+		protected function get_default_config() {
+
+			return array(
+				'tabs'           => false,
+				'simple_options' => false,
+
+			);
+
+		}
+
 		/**
 		 * Set Properties of the class
 		 */
 		protected function set_properties( array $config_array ) {
+
+			// Normalise config array
+			$config_array = wp_parse_args( $config_array, $this->get_default_config() );
+
+			if ( $config_array['tabs'] ) {
+				$this->is_tabs = true;
+			}
+
+			if ( isset( $config_array['tabs'] ) ) {
+				$this->set_tabs( $config_array['tabs'] );
+			}
 
 			// Do we have menu config, if yes, call the method
 			if ( isset( $config_array['menu'] ) ) {
@@ -80,6 +103,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			if ( isset( $config_array['links'] ) ) {
 				$this->set_links( $config_array['links'] );
 			}
+
 
 		}
 
@@ -115,7 +139,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		public function get_default_settings_link() {
 
 			return array(
-				'<a href="' . $this->get_default_settings_url() . '">' . __( 'Settings', '' ) . '</a>',
+				'<a href="' . $this->get_default_settings_url() . '">' . __( 'Settings', $this->text_domain ) . '</a>',
 			);
 
 		}
@@ -198,6 +222,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		}
 
+
+		public function set_tabs( $config_tabs ) {
+			$this->is_tabs = ( (bool) $config_tabs ) ? true : false;
+		}
 
 		/**
 		 * Register plugin option page
@@ -292,22 +320,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		}
 
 
-		function display_page() {
-			echo '<div class="wrap">';
-
-                if ( $this->debug ) {
-                    echo "<b>TYPES of fields</b>";
-                    $this->var_dump_pretty( $this->get_field_types() );
-                }
-
-            $this->show_navigation();
-			$this->show_forms();
-
-			echo '</div>';
-
-		}
-
-
 		/**
 		 * @return bool true if its menu options
 		 */
@@ -324,14 +336,14 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function admin_enqueue_scripts() {
 
-            // Conditionally Load scripts and styles for field types configured
+			// Conditionally Load scripts and styles for field types configured
 
-            // Load scripts for only plugin menu page
-			if(! $this->is_menu_page_loaded()){
-			    return null;
-            }
+			// Load scripts for only plugin menu page
+			if ( ! $this->is_menu_page_loaded() ) {
+				return null;
+			}
 
-            // Load Color Picker if required
+			// Load Color Picker if required
 			if ( in_array( 'color', $this->get_field_types() ) ) {
 				wp_enqueue_style( 'wp-color-picker' );
 				wp_enqueue_script( 'wp-color-picker' );
@@ -375,6 +387,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		public function set_fields( $fields ) {
 			$this->settings_fields = array_merge_recursive( $this->settings_fields, $fields );
 			$this->setup_hooks();
+
 			return $this;
 		}
 
@@ -817,13 +830,34 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			return $default;
 		}
 
+
+		function display_page() {
+			echo '<div class="wrap">';
+
+			if ( $this->debug ) {
+				echo "<b>TYPES of fields</b>";
+				$this->var_dump_pretty( $this->get_field_types() );
+			}
+
+
+			if ( $this->is_tabs ) {
+				$this->show_navigation();
+			}
+//			$this->show_navigation();
+			$this->show_forms();
+
+			echo '</div>';
+
+		}
+
+
 		/**
 		 * Show navigations as tab
 		 *
 		 * Shows all the settings section labels as tab
 		 */
 		function show_navigation() {
-			$html = '<h2 class="nav-tab-wrapper">';
+			$settings_page = $this->get_default_settings_url();
 
 			$count = count( $this->settings_sections );
 
@@ -832,8 +866,13 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				return;
 			}
 
+			$active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : $this->settings_sections[0]['id'];
+
+			$html = '<h2 class="nav-tab-wrapper">';
+
 			foreach ( $this->settings_sections as $tab ) {
-				$html .= sprintf( '<a href="#%1$s" class="nav-tab" id="%1$s-tab">%2$s</a>', $tab['id'], $tab['title'] );
+			    $active_class = ($tab['id'] == $active_tab) ? 'nav-tab-active' : '';
+				$html .= sprintf( '<a href="%3$s&tab=%1$s" class="nav-tab %4$s" id="%1$s-tab">%2$s</a>', $tab['id'], $tab['title'], $settings_page, $active_class );
 			}
 
 			$html .= '</h2>';
@@ -848,6 +887,68 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			echo "</pre>";
 		}
 
+		function tabbed_sections() {
+
+			$active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : $this->settings_sections[0]['id'];
+
+			foreach ( $this->settings_sections as $section ) {
+
+			    // Dont out put fields if its not the right section/tab
+			    if($active_tab != $section['id']){
+			        continue;
+                }
+
+			    ?>
+                <div class="metabox-holder">
+<!--                    <div id="--><?php //echo $section['id']; ?><!--" class="group">-->
+                        <form id="<?php echo $this->config_menu['slug'];?>" method="post" action="options.php">
+							<?php
+							do_action( 'wsa_form_top_' . $section['id'], $section );
+							settings_fields( $section['id'] );
+							do_settings_sections( $section['id'] );
+							do_action( 'wsa_form_bottom_' . $section['id'], $section );
+							if ( isset( $this->settings_fields[ $section['id'] ] ) ):
+								?>
+                                <div style="padding-left: 10px">
+									<?php submit_button(); ?>
+                                </div>
+							<?php endif; ?>
+                        </form>
+<!--                    </div>-->
+                </div>
+
+
+			<?php } // end foreach
+		}
+
+		function tabless_sections() {
+			?>
+
+            <div class="metabox-holder">
+                <form id="<?php echo $this->config_menu['slug']; ?>" method="post" action="options.php">
+					<?php foreach ( $this->settings_sections as $section ) : ?>
+                        <div id="<?php echo $section['id']; ?>">
+
+							<?php
+							do_action( 'wsa_form_top_' . $section['id'], $section );
+							settings_fields( $section['id'] );
+							do_settings_sections( $section['id'] );
+							do_action( 'wsa_form_bottom_' . $section['id'], $section );
+							?>
+                        </div>
+					<?php endforeach; ?>
+                    <div style="padding-left: 10px">
+						<?php submit_button(); ?>
+                    </div>
+                </form>
+            </div>
+
+			<?php
+
+
+		}
+
+
 		/**
 		 * Show the section settings forms
 		 *
@@ -855,101 +956,29 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function show_forms() {
 
-			$style_att = "style='display:none;'"
-			?>
-            <div class="metabox-holder">
-				<?php foreach ( $this->settings_sections as $form ) { ?>
-                    <div id="<?php echo $form['id']; ?>" class="group" style="display: none;">
+			( $this->is_tabs ) ? $this->tabbed_sections() : $this->tabless_sections();
 
-						<?php
-						if ( $this->debug ) {
-							echo( "<b>{$form['id']}</b>" );
-							$this->var_dump_pretty( get_option( $form['id'] ) );
-						};
-						?>
-                        <form method="post" action="options.php">
-							<?php
-							do_action( 'wsa_form_top_' . $form['id'], $form );
-							settings_fields( $form['id'] );
-							do_settings_sections( $form['id'] );
-							do_action( 'wsa_form_bottom_' . $form['id'], $form );
-							if ( isset( $this->settings_fields[ $form['id'] ] ) ):
-								?>
-                                <div style="padding-left: 10px">
-									<?php submit_button(); ?>
-                                </div>
-							<?php endif; ?>
-                        </form>
-                    </div>
-				<?php } ?>
-            </div>
-			<?php
-			$this->script();
+			$this->script_general();
+
 		}
+
 
 		/**
 		 * Tabbable JavaScript codes & Initiate Color Picker
 		 *
 		 * This code uses localstorage for displaying active tabs
 		 */
-		function script() {
+		function script_general() {
 			?>
             <script>
                 jQuery(document).ready(function ($) {
                     //Initiate Color Picker
-                    if( $('.wp-color-picker-field').length > 0 ){
+                    if ($('.wp-color-picker-field').length > 0) {
                         $('.wp-color-picker-field').wpColorPicker();
                     }
 
-                    // Switches option sections
-                    $('.group').hide();
-                    var activetab = '';
-                    if (typeof(localStorage) != 'undefined') {
-                        activetab = localStorage.getItem("activetab");
-                    }
 
-                    //if url has section id as hash then set it as active or override the current local storage value
-                    if (window.location.hash) {
-                        activetab = window.location.hash;
-                        if (typeof(localStorage) != 'undefined') {
-                            localStorage.setItem("activetab", activetab);
-                        }
-                    }
-
-                    if (activetab != '' && $(activetab).length) {
-                        $(activetab).fadeIn();
-                    } else {
-                        $('.group:first').fadeIn();
-                    }
-                    $('.group .collapsed').each(function () {
-                        $(this).find('input:checked').parent().parent().parent().nextAll().each(
-                            function () {
-                                if ($(this).hasClass('last')) {
-                                    $(this).removeClass('hidden');
-                                    return false;
-                                }
-                                $(this).filter('.hidden').removeClass('hidden');
-                            });
-                    });
-
-                    if (activetab != '' && $(activetab + '-tab').length) {
-                        $(activetab + '-tab').addClass('nav-tab-active');
-                    }
-                    else {
-                        $('.nav-tab-wrapper a:first').addClass('nav-tab-active');
-                    }
-                    $('.nav-tab-wrapper a').click(function (evt) {
-                        $('.nav-tab-wrapper a').removeClass('nav-tab-active');
-                        $(this).addClass('nav-tab-active').blur();
-                        var clicked_group = $(this).attr('href');
-                        if (typeof(localStorage) != 'undefined') {
-                            localStorage.setItem("activetab", $(this).attr('href'));
-                        }
-                        $('.group').hide();
-                        $(clicked_group).fadeIn();
-                        evt.preventDefault();
-                    });
-
+                    // For Files Upload
                     $('.wpsa-browse').on('click', function (event) {
                         event.preventDefault();
 
@@ -972,29 +1001,35 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                         // Finally, open the modal
                         file_frame.open();
                     });
+
+                    $( function() {
+                        var changed = false;
+
+                        $( 'input, textarea, select, checkbox' ).change( function() {
+                            changed = true;
+                        });
+
+                        $( '.nav-tab-wrapper a' ).click( function() {
+                            if ( changed ) {
+                                window.onbeforeunload = function() {
+                                    return "Changes you made may not be saved."
+                                };
+                            } else {
+                                window.onbeforeunload = '';
+                            }
+                        });
+
+                        $( '.submit :input' ).click( function() {
+                            window.onbeforeunload = '';
+                        });
+                    });
+
+
+
                 });
             </script>
 			<?php
-			$this->_style_fix();
-		}
-
-		function _style_fix() {
-			global $wp_version;
-
-			if ( version_compare( $wp_version, '3.8', '<=' ) ):
-				?>
-                <style type="text/css">
-                    /** WordPress 3.8 Fix **/
-                    .form-table th {
-                        padding: 20px 10px;
-                    }
-
-                    #wpbody-content .metabox-holder {
-                        padding-top: 5px;
-                    }
-                </style>
-			<?php
-			endif;
+//			$this->_style_fix();
 		}
 
 	}
