@@ -12,7 +12,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 	class Boo_Settings_Helper {
 
-		public $debug = false;
+		public $debug = true;
 
 		public $text_domain = 'boo-helper';
 
@@ -475,7 +475,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			// creates our settings in the options table
 			foreach ( $this->settings_sections as $section ) {
-				register_setting( $section['id'], $section['id'], array( $this, 'sanitize_options' ) );
+				register_setting( $section['id'], $section['id'] , array( $this, 'sanitize_options' ) );
 			}
 
 //			$this->var_dump( $this->settings_fields); die();
@@ -762,9 +762,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function sanitize_options( $options ) {
 
-			if ( $this->debug ) {
-				$this->write_log( 'sanitize_options', var_export( $options ) . PHP_EOL );
-			}
+			$this->write_log( 'sanitize_options', var_export( $_POST , true ) . PHP_EOL );
+			$this->write_log( 'sanitize_options', var_export( $options , true ) . PHP_EOL );
 
 			if ( ! $options ) {
 				return $options;
@@ -900,8 +899,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			    ?>
                 <div class="metabox-holder">
-<!--                    <div id="--><?php //echo $section['id']; ?><!--" class="group">-->
-                        <form id="<?php echo $this->config_menu['slug'];?>" method="post" action="options.php">
+                        <form method="post" action="options.php">
 							<?php
 							do_action( 'wsa_form_top_' . $section['id'], $section );
 							settings_fields( $section['id'] );
@@ -914,7 +912,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                                 </div>
 							<?php endif; ?>
                         </form>
-<!--                    </div>-->
                 </div>
 
 
@@ -925,15 +922,16 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			?>
 
             <div class="metabox-holder">
-                <form id="<?php echo $this->config_menu['slug']; ?>" method="post" action="options.php">
+                <form method="post" action="options.php">
 					<?php foreach ( $this->settings_sections as $section ) : ?>
                         <div id="<?php echo $section['id']; ?>">
-
 							<?php
-							do_action( 'wsa_form_top_' . $section['id'], $section );
+//                            $this->var_dump_pretty( get_option( $section['id']));
+
+//							do_action( 'wsa_form_top_' . $section['id'], $section );
 							settings_fields( $section['id'] );
 							do_settings_sections( $section['id'] );
-							do_action( 'wsa_form_bottom_' . $section['id'], $section );
+//							do_action( 'wsa_form_bottom_' . $section['id'], $section );
 							?>
                         </div>
 					<?php endforeach; ?>
@@ -1023,8 +1021,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                             window.onbeforeunload = '';
                         });
                     });
-
-
 
                 });
             </script>
