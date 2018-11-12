@@ -30,6 +30,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		protected $active_tab;
 
+		protected $sections_count;
+
+		protected $sections_ids;
+
 //		protected $options_id;
 
 //		protected $is_simple_options;
@@ -394,6 +398,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			$this->settings_sections = array_merge_recursive( $this->settings_sections, $sections );
 
+			$this->sections_count = count( $this->settings_sections );
+
+			$this->sections_ids = array_values( $this->settings_sections );
+
 			return $this;
 		}
 
@@ -446,8 +454,11 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			// creates our settings in the options table
 			foreach ( array_keys( $this->settings_fields ) as $section_id ) {
+
+				$options_group_id = ( $this->is_tabs ) ? $section_id : $this->get_options_group();
+
 				register_setting(
-					$section_id, // options_group
+					$options_group_id, // options_group
 					$section_id, // options_id
 					array(          // callback
 						$this,
@@ -853,10 +864,32 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				return $posted_data;
 			}
 
-			$this->write_log( 'sanitize_options', var_export( $_POST, true ) . PHP_EOL );
-			$this->write_log( 'sanitize_options', var_export( $posted_data, true ) . PHP_EOL );
+//			$this->write_log( 'sanitize_options', var_export( $_POST, true ) . PHP_EOL );
+
+
+			$posted_section_id = array_shift( $this->sections_ids );
+			$this->write_log( 'sanitize_options', 'Section ID:' . var_export( $posted_section_id['id'], true ) . PHP_EOL );
+			$this->write_log( 'sanitize_options', 'Posted Data:' . var_export( $posted_data, true ) . PHP_EOL );
+
+//            // Debugg
+//			if ( isset( $posted_section_id['id'] ) && $posted_section_id['id'] === 'wedevs_basics' ) {
+//				return array(
+//					'color'    => '#ffffff',
+//					'text_val' => 'df sdf sdf ',
+//				);
+//			}
+
+
+//			$this->write_log( 'sanitize_options', var_export( $this->sections_ids, true ) . PHP_EOL );
+
+//			$this->tabs_count --;
+
+
+//			$this->write_log( 'sanitize_options', var_export( $this->tabs_count, true ) . PHP_EOL );
 
 			return $posted_data;
+
+			return $this->get_sanitized_field_values( $section_id, $posted_data );
 
 //			$saved_tab_key     = array_shift( array_keys( $posted_data ) );
 //			$db_options        = get_option( $this->get_options_id() );
@@ -1007,9 +1040,55 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 				}
 			}
+			?>
+            <div class="metabox-holder">
+				<?php
+				if ( $this->is_tabs ) {
+					$this->show_navigation();
+				}
+				?>
+                <form method="post" action="options.php">
+					<?php
+
+					foreach ( $this->settings_sections as $section ) :
+
+//						settings_fields( $this->get_options_group() );
+
+						// Dont out put fields if its not the right section/tab
+//						if ( $this->active_tab != $section['id'] && $this->is_tabs ) {
+//							continue;
+//						}
 
 
-			$this->show_forms();
+						if ( $this->is_tabs && $this->active_tab != $section['id'] ) {
+							continue;
+						}
+
+						if ( $this->is_tabs ) {
+							// for tabs
+							settings_fields( $section['id'] );
+						} else {
+							// for tab-less
+							settings_fields( $this->get_options_group() );
+						}
+
+//
+
+
+//						do_settings_sections( $section['id'] );
+						do_settings_sections( $section['id'] );
+
+					endforeach; // end foreach
+					?>
+                    <div style="padding-left: 10px">
+						<?php submit_button(); ?>
+                    </div>
+
+                </form>
+            </div>
+			<?php
+
+			$this->script_general();
 
 			echo '</div>';
 
@@ -1128,6 +1207,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 *
 		 * This function displays every sections in a different form
 		 */
+		/*
 		function show_forms() {
 
 //			( $this->is_tabs ) ? $this->tabbed_sections() : $this->tabless_sections();
@@ -1153,6 +1233,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 						if ( $this->active_tab != $section['id'] && $this->is_tabs ) {
 							continue;
 						}
+//						settings_fields( $section['id'] );
 						settings_fields( $section['id'] );
 
 
@@ -1173,6 +1254,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			$this->script_general();
 
 		}
+
+		*/
 
 
 		/**
