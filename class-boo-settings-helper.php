@@ -12,7 +12,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 	class Boo_Settings_Helper {
 
-		public $debug = true;
+		public $debug = false;
+		public $log = true;
 
 		public $text_domain = 'boo-helper';
 
@@ -81,6 +82,43 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			);
 
 		}
+
+		// For Debugging
+		protected function get_posted_data() {
+
+			return array(
+				'wedevs_basics'   => array(
+					'color'        => '#1e73be',
+					'number_input' => '',
+					'text_val'     => '<strong>clog("hello");</strong>this is done',
+//					'text_val'     => sanitize_text_field( '<strong>clog("hello");</strong>this is done'),
+					'textarea'     => '',
+//					'checkbox'     => 'off',
+//					'selectbox'    => 'no',
+//					'password'     => '',
+//					'file'         => '',
+//					'wysiwyg'      => '',
+//					'multicheck'   =>
+//						array(
+//							'one'  => 'one',
+//							'four' => 'four',
+//						),
+				),
+				'wedevs_advanced' => array(
+					'password'   => '121212',
+					'wysiwyg'    => '<b>whiteasd</b> <strong>clog("hello");</strong> asd asd  azxcasdfasdf dsafsd asd asd',
+					'multicheck' =>
+						array(
+							'one'  => 'one',
+							'four' => 'four',
+						),
+				)
+			);
+
+
+		}
+
+
 
 //		public function is_simple_options() {
 //
@@ -868,76 +906,193 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 
 			$posted_section_id = array_shift( $this->sections_ids );
-			$this->write_log( 'sanitize_options', 'Section ID:' . var_export( $posted_section_id['id'], true ) . PHP_EOL );
-			$this->write_log( 'sanitize_options', 'Posted Data:' . var_export( $posted_data, true ) . PHP_EOL );
+			$posted_section_id = array_shift( $posted_section_id );
 
-//            // Debugg
-//			if ( isset( $posted_section_id['id'] ) && $posted_section_id['id'] === 'wedevs_basics' ) {
-//				return array(
-//					'color'    => '#ffffff',
-//					'text_val' => 'df sdf sdf ',
-//				);
-//			}
+			if ( $this->log ) {
+				$this->write_log( 'sanitize_options', 'Section ID: ' . var_export( $posted_section_id, true ) . PHP_EOL );
+				$this->write_log( 'sanitize_options', 'Posted Data: ' . var_export( $posted_data, true ) . PHP_EOL );
+//				$this->write_log( 'sanitize_options', '$_POST: ' . var_export( $_POST, true ) . PHP_EOL );
+			}
 
+			$sanitized_data = $this->get_sanitized_fields_values( $posted_section_id, $posted_data );
 
-//			$this->write_log( 'sanitize_options', var_export( $this->sections_ids, true ) . PHP_EOL );
+			if ( $this->log ) {
+				$this->write_log( 'sanitize_options', 'Sanitized Data: ' . var_export( $sanitized_data, true ) . PHP_EOL );
 
-//			$this->tabs_count --;
-
-
-//			$this->write_log( 'sanitize_options', var_export( $this->tabs_count, true ) . PHP_EOL );
-
-			return $posted_data;
-
-			return $this->get_sanitized_field_values( $section_id, $posted_data );
-
-//			$saved_tab_key     = array_shift( array_keys( $posted_data ) );
-//			$db_options        = get_option( $this->get_options_id() );
-//			$preserved_options = array();
-//			$clean_data        = array();
-//
-//			// preserve other tabs options if its not simple_options
-//			if ( ! $this->is_tabs ) {
-//				foreach ( $db_options as $tab_key => $tab_options ) {
-//
-//					if ( ! in_array( $tab_key, $saved_tab_key ) ) {
-//						$preserved_options[ $tab_key ] = $tab_options;
-//					}
-//				}
-//
-//			}
+			}
 
 
-//
-//			if ( ! $posted_data ) {
-//				return $posted_data;
-//			}
-
-//			if ( ! $this->is_simple_options() ) {
-//				$posted_data = array_shift( $posted_data );
-//			}
-//
-//			foreach ( $posted_data as $option_slug => $option_value ) {
-//				$sanitize_callback = $this->get_sanitize_callback( $option_slug );
-//
-//				// If callback is set, call it
-//				if ( $sanitize_callback ) {
-//					$clean_data[ $option_slug ] = call_user_func( $sanitize_callback, $option_value );
-//					continue;
-//				} else {
-//					$clean_data[ $option_slug ] = $option_value;
-//				}
-//			}
+			return $sanitized_data;
 
 
-//			if ( ! $this->is_simple_options() ) {
-//				$preserved_options[ $saved_tab_key ] = $clean_data;
-//				$clean_data                          = $preserved_options;
-//			}
+		}
 
-//			$this->write_log( 'sanitize_options', var_export( $clean_data, true ) . PHP_EOL );
 
-//			return $clean_data;
+		public function settings_fields( $section_id = null ) {
+
+			if ( empty( $section_id ) ) {
+				return $this->settings_fields;
+			} else {
+				return ( isset( $this->settings_fields[ $section_id ] ) ) ? $this->settings_fields[ $section_id ] : null;
+			}
+
+
+		}
+
+
+		public function get_sanitized_fields_values( $posted_section_id, $posted_data ) {
+
+
+			// initialize array
+			$sanitized_fields_data = array();
+
+			$fields = $this->settings_fields( $posted_section_id );
+
+
+			if ( ! is_array( $fields ) ) {
+				return null;
+			}
+
+
+			foreach ( $fields as $index => $field ) :
+
+
+				$field_type = ( isset( $field['type'] ) ) ? $field['type'] : false;
+				$field_id   = ( isset( $field['name'] ) ) ? $field['name'] : false;
+
+				// if do not have $field_id or $field_type, we continue to next field
+				if ( ! $field_id || ! $field_type ) {
+					continue;
+				}
+
+
+				$sanitized_fields_data[ $field_id ] = $this->get_sanitized_field_value( $field, $posted_data );
+
+			endforeach; // $fields array
+
+			return $sanitized_fields_data;
+
+		} //
+
+
+		/**
+		 * Get the clean value from single field
+		 *
+		 * @param array $field
+		 *
+		 * @return mixed $clean_value
+		 */
+		public function get_sanitized_field_value( $field, $posted_data ) {
+
+
+			if ( ! isset( $field['name'] ) || ! isset( $field['type'] ) ) {
+				return null;
+			} else {
+				$field_id = $field['name'];
+			}
+
+
+			// Get $dirty_value from global $_POST
+			$dirty_value = isset( $posted_data[ $field_id ] ) ? $posted_data[ $field_id ] : null;
+
+//			die($dirty_value);
+
+			$clean_value = $this->sanitize( $field, $dirty_value );
+
+			return $clean_value;
+
+		}
+
+
+		public function sanitize( $field, $dirty_value ) {
+
+
+			$dirty_value = ! empty( $dirty_value ) ? $dirty_value : '';
+
+
+			// if $config array has sanitize function, then call it
+			if ( isset( $field['sanitize'] ) && ! empty( $field['sanitize'] ) && function_exists( $field['sanitize'] ) ) {
+
+
+				// TODO: in future, we can allow for sanitize functions array as well
+				$sanitize_func_name = $field['sanitize'];
+
+				$clean_value = call_user_func( $sanitize_func_name, $dirty_value );
+
+			} else {
+
+				// if $config array doe not have sanitize function, do sanitize on field type basis
+				$clean_value = $this->get_sanitized_field_value_by_type( $field, $dirty_value );
+
+			}
+
+			return apply_filters( 'boo_settings_sanitize_value_field_' . $field['name'], $clean_value );
+
+		}
+
+
+		/**
+		 * Pass the field and value to run sanitization by type of field
+		 *
+		 * @param array $field
+		 * @param mixed $value
+		 *
+		 * $return mixed $value after sanitization
+		 */
+		public function get_sanitized_field_value_by_type( $field, $value ) {
+
+			$field_type = ( isset( $field['type'] ) ) ? $field['type'] : '';
+
+			switch ( $field_type ) {
+
+				case 'number':
+					if ( isset( $field['min'] ) && $value < $field['min'] ) {
+						$value = $field['min'];
+					}
+					if ( isset( $field['max'] ) && $value > $field['max'] ) {
+						$value = $field['max'];
+					}
+					$value = ( is_numeric( $value ) ) ? $value : 0;
+
+					break;
+
+				case 'textarea':
+					// HTML and array are allowed
+//					$value = esc_textarea( $value );
+					$value = wp_kses_post( $value );
+					break;
+
+//					TODO: checkbox 'on' state should be 1 not 'on'
+				case 'checkbox':
+					$value = ( $value === 'on' ) ? 'on' : 'off';
+					break;
+
+				case 'select':
+					// no break
+				case 'radio':
+					// no break
+
+					if ( isset( $field['options'] ) && is_array( $field['options'] ) ) {
+						$value = ( in_array( $value, array_keys( $field['options'] ) ) ) ? $value : null;
+						$value = ( empty( $value ) && isset( $field['default'] ) ) ? $field['default'] : null;
+
+//						$this->write_log( 'value', var_export( $field['options'], true ) );
+
+					}
+
+
+					break;
+				// no break
+				case 'editor':
+					// no break
+
+
+				default:
+					$value = ( ! empty( $value ) ) ? sanitize_text_field( $value ) : '';
+
+			}
+
+			return $value;
 
 		}
 
@@ -1040,6 +1195,21 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 				}
 			}
+
+			if ( $this->debug ) {
+				$this->var_export_pretty( $this->get_posted_data() );
+
+
+				foreach ( $this->get_posted_data() as $posted_data ) {
+
+					$clean_data = $this->sanitize_options( $posted_data );
+
+					$this->var_dump_pretty( $clean_data );
+
+				}
+			}
+
+
 			?>
             <div class="metabox-holder">
 				<?php
@@ -1128,6 +1298,12 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		public function var_dump_pretty( $var ) {
 			echo "<pre>";
 			var_dump( $var );
+			echo "</pre>";
+		}
+
+		public function var_export_pretty( $var ) {
+			echo "<pre>";
+			var_export( $var );
 			echo "</pre>";
 		}
 
