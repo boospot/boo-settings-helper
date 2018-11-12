@@ -28,6 +28,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		public $slug;
 
+		protected $active_tab;
+
 //		protected $options_id;
 
 //		protected $is_simple_options;
@@ -434,9 +436,9 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			return $this;
 		}
 
-		public function get_options_group(){
-		    return str_replace( '-', '_', $this->slug);
-        }
+		public function get_options_group() {
+			return str_replace( '-', '_', $this->slug );
+		}
 
 
 		public function register_settings() {
@@ -847,12 +849,13 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function sanitize_options( $posted_data ) {
 
-            if ( ! $posted_data ) {
+			if ( ! $posted_data ) {
 				return $posted_data;
 			}
 
 			$this->write_log( 'sanitize_options', var_export( $_POST, true ) . PHP_EOL );
 			$this->write_log( 'sanitize_options', var_export( $posted_data, true ) . PHP_EOL );
+
 			return $posted_data;
 
 //			$saved_tab_key     = array_shift( array_keys( $posted_data ) );
@@ -956,11 +959,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 //			return $default;
 
 
-
 			$options = get_option( $section );
 
-			if ( isset( $options[$option] ) ) {
-				return $options[$option];
+			if ( isset( $options[ $option ] ) ) {
+				return $options[ $option ];
 			}
 
 			return $default;
@@ -984,6 +986,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		function display_page() {
 
+			$this->active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : $this->settings_sections[0]['id'];
+
 			// Save Default options in DB with default values
 //			$this->set_default_db_options();
 			settings_errors();
@@ -991,19 +995,20 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			echo '<div class="wrap">';
 
-//			if ( $this->debug ) {
-////				echo "<b>TYPES of fields</b>";
-////				$this->var_dump_pretty( $this->get_field_types() );
-////                delete_option( $this->options_id);
-//				echo "<b>Options Array</b>";
-//				$this->var_dump_pretty( get_option( $this->get_options_id() ) );
-//			}
+			if ( $this->debug ) {
+				echo "<b>TYPES of fields</b>";
+				$this->var_dump_pretty( $this->get_field_types() );
+//                delete_option( $this->options_id);
+
+				if ( $this->is_tabs ) {
+
+					echo "<b>Active Tab Options Array</b>";
+					$this->var_dump_pretty( get_option( $this->active_tab ) );
+
+				}
+			}
 
 
-//			if ( $this->is_tabs ) {
-//				$this->show_navigation();
-//			}
-//			$this->show_navigation();
 			$this->show_forms();
 
 			echo '</div>';
@@ -1017,6 +1022,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * Shows all the settings section labels as tab
 		 */
 		function show_navigation() {
+
 			$settings_page = $this->get_default_settings_url();
 
 			$count = count( $this->settings_sections );
@@ -1026,12 +1032,11 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				return;
 			}
 
-			$active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : $this->settings_sections[0]['id'];
 
 			$html = '<h2 class="nav-tab-wrapper">';
 
 			foreach ( $this->settings_sections as $tab ) {
-				$active_class = ( $tab['id'] == $active_tab ) ? 'nav-tab-active' : '';
+				$active_class = ( $tab['id'] == $this->active_tab ) ? 'nav-tab-active' : '';
 				$html         .= sprintf( '<a href="%3$s&tab=%1$s" class="nav-tab %4$s" id="%1$s-tab">%2$s</a>', $tab['id'], $tab['title'], $settings_page, $active_class );
 			}
 
@@ -1128,7 +1133,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 //			( $this->is_tabs ) ? $this->tabbed_sections() : $this->tabless_sections();
 
 //			$active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : array_shift( array_keys( $this->settings_fields ) );
-			$active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : $this->settings_sections[0]['id'];
+//			$active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : $this->settings_sections[0]['id'];
 
 			?>
             <div class="metabox-holder">
@@ -1145,14 +1150,15 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 //						settings_fields( $this->get_options_group() );
 
 						// Dont out put fields if its not the right section/tab
-						if ( $active_tab != $section['id'] && $this->is_tabs ) {
+						if ( $this->active_tab != $section['id'] && $this->is_tabs ) {
 							continue;
 						}
 						settings_fields( $section['id'] );
 
 
+
 //						do_settings_sections( $section['id'] );
-						do_settings_sections( $section['id']);
+						do_settings_sections( $section['id'] );
 
 					endforeach; // end foreach
 					?>
