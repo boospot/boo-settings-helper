@@ -1086,6 +1086,24 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				case 'editor':
 					// no break
 
+				case 'color':
+					// If string does not start with 'rgba', then treat as hex
+					// sanitize the hex color and finally convert hex to rgba
+					if ( false === strpos( $value, 'rgba' ) ) {
+						$value = sanitize_hex_color( $value );
+						break;
+					}
+
+					// By now we know the string is formatted as an rgba color so we need to further sanitize it.
+					$value = trim( $value, ' ' );
+					$red   = $green = $blue = $alpha = '';
+
+					sscanf( $value, 'rgba(%d,%d,%d,%f)', $red, $green, $blue, $alpha );
+
+					$value = 'rgba(' . $red . ',' . $green . ',' . $blue . ',' . $alpha . ')';
+
+					break;
+
 
 				default:
 					$value = ( ! empty( $value ) ) ? sanitize_text_field( $value ) : '';
@@ -1093,6 +1111,34 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			}
 
 			return $value;
+
+		}
+
+
+		/**
+		 * @param $color
+		 *
+		 * @return null|string
+		 */
+		function sanitize_color( $color ) {
+
+			if ( '' === $color ) {
+				return '';
+			}
+
+			// If string does not start with 'rgba', then treat as hex
+			// sanitize the hex color and finally convert hex to rgba
+			if ( false === strpos( $color, 'rgba' ) ) {
+				return sanitize_hex_color( $color );
+			}
+
+			// By now we know the string is formatted as an rgba color so we need to further sanitize it.
+			$color = trim( $color, ' ' );
+			$red   = $green = $blue = $alpha = '';
+
+			sscanf( $color, 'rgba(%d,%d,%d,%f)', $red, $green, $blue, $alpha );
+
+			return 'rgba(' . $red . ',' . $green . ',' . $blue . ',' . $alpha . ')';
 
 		}
 
