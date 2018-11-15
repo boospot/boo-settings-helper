@@ -13,7 +13,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 	class Boo_Settings_Helper {
 
 		public $debug = false;
-		public $log = true;
+		public $log = false;
 
 		public $text_domain = 'boo-helper';
 
@@ -857,7 +857,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			$width         = isset( $args['width'] ) ? absint( $args['width'] ) : '';
 			$height        = isset( $args['height'] ) ? absint( $args['height'] ) : '';
 			$text          = isset( $args['btn'] ) ? sanitize_text_field( $args['btn'] ) : 'Upload';
-			$name  = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
+			$name          = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
 			$args['value'] = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
 
 
@@ -937,7 +937,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				'selected' => esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) ),
 				'name'     => $name,
 				'id'       => $args['section'] . '[' . $args['id'] . ']',
-				'echo'     => 0
+				'echo'     => 0,
 			);
 			$html          = wp_dropdown_pages( $dropdown_args );
 			echo $html;
@@ -1188,7 +1188,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 					break;
 
 				case 'url':
-				    // no break
+					// no break
 				case 'file':
 					$value = esc_url_raw( $value );
 					break;
@@ -1200,11 +1200,11 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 				case 'pages':
 
-					$value = absint( $value ); // nothing to save
+					$value = absint( $value );
 					break;
 
 				case 'media':
-					$value = absint( $value ); // nothing to save
+					$value = absint( $value );
 					break;
 
 
@@ -1646,10 +1646,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 
                     // The "Upload" button
-                    $('.wpsf-image-upload').click(function() {
+                    $('.wpsf-image-upload').click(function () {
                         var send_attachment_bkp = wp.media.editor.send.attachment;
                         var button = $(this);
-                        wp.media.editor.send.attachment = function(props, attachment) {
+                        wp.media.editor.send.attachment = function (props, attachment) {
                             $(button).parent().prev().attr('src', attachment.url);
                             $(button).prev().val(attachment.id);
                             wp.media.editor.send.attachment = send_attachment_bkp;
@@ -1659,7 +1659,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                     });
 
 // The "Remove" button (remove the value from input type='hidden')
-                    $('.wpsf-image-remove').click(function() {
+                    $('.wpsf-image-remove').click(function () {
                         var answer = confirm('Are you sure?');
                         if (answer == true) {
                             var src = $(this).parent().prev().attr('data-src');
