@@ -841,6 +841,58 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			echo $html;
 		}
 
+
+		/**
+		 * Generate: Uploader field
+		 *
+		 * @param array $args
+		 *
+		 * @source: https://mycyberuniverse.com/integration-wordpress-media-uploader-plugin-options-page.html
+		 */
+		public function callback_media( $args ) {
+
+			// Set variables
+			$default_image = isset( $args['default'] ) ? esc_url_raw( $args['default'] ) : 'https://www.placehold.it/115x115';
+			$max_width     = isset( $args['max_width'] ) ? absint( $args['max_width'] ) : 400;
+			$width         = isset( $args['width'] ) ? absint( $args['width'] ) : '';
+			$height        = isset( $args['height'] ) ? absint( $args['height'] ) : '';
+			$text          = isset( $args['btn'] ) ? sanitize_text_field( $args['btn'] ) : 'Upload';
+			$name  = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
+			$args['value'] = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
+
+
+			$image_size = ( ! empty( $width ) && ! empty( $height ) ) ? array( $width, $height ) : 'thumbnail';
+
+			if ( ! empty( $args['value'] ) ) {
+				$image_attributes = wp_get_attachment_image_src( $args['value'], $image_size );
+				$src              = $image_attributes[0];
+				$value            = $args['value'];
+			} else {
+				$src   = $default_image;
+				$value = '';
+			}
+
+			$image_style = ! is_array( $image_size ) ? "style='max-width:100%; height:auto;'" : "style='width:{$width}px; height:{$height}px;'";
+
+			// Print HTML field
+			echo '
+                <div class="upload" style="max-width:' . $max_width . 'px;">
+                    <img data-src="' . $default_image . '" src="' . $src . '" ' . $image_style . '/>
+                    <div>
+                        <input type="hidden" name="' . $name . '" id="' . $args['name'] . '" value="' . $value . '" />
+                        <button type="submit" class="wpsf-image-upload button">' . $text . '</button>
+                        <button type="submit" class="wpsf-image-remove button">&times;</button>
+                    </div>
+                </div>
+            ';
+
+			$this->get_field_description( $args );
+
+			// free memory
+			unset( $default_image, $max_width, $width, $height, $text, $image_size, $image_style, $value );
+
+		}
+
 		/**
 		 * Displays a password field for a settings field
 		 *
@@ -1147,6 +1199,11 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 					break;
 
 				case 'pages':
+
+					$value = absint( $value ); // nothing to save
+					break;
+
+				case 'media':
 
 					$value = absint( $value ); // nothing to save
 					break;
@@ -1559,7 +1616,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
                         file_frame.on('select', function () {
                             attachment = file_frame.state().get('selection').first().toJSON();
-                            self.prev('.wpsa-url').val(attachment.url).change();
+                            console.log(attachment);
+                            self.prev('.wpsa-url').val(attachment.id).change();
                         });
 
                         // Finally, open the modal
@@ -1586,6 +1644,31 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                         $('.submit :input').click(function () {
                             window.onbeforeunload = '';
                         });
+                    });
+
+
+                    // The "Upload" button
+                    $('.wpsf-image-upload').click(function() {
+                        var send_attachment_bkp = wp.media.editor.send.attachment;
+                        var button = $(this);
+                        wp.media.editor.send.attachment = function(props, attachment) {
+                            $(button).parent().prev().attr('src', attachment.url);
+                            $(button).prev().val(attachment.id);
+                            wp.media.editor.send.attachment = send_attachment_bkp;
+                        }
+                        wp.media.editor.open(button);
+                        return false;
+                    });
+
+// The "Remove" button (remove the value from input type='hidden')
+                    $('.wpsf-image-remove').click(function() {
+                        var answer = confirm('Are you sure?');
+                        if (answer == true) {
+                            var src = $(this).parent().prev().attr('data-src');
+                            $(this).parent().prev().attr('src', src);
+                            $(this).prev().prev().val('');
+                        }
+                        return false;
                     });
 
                 });
