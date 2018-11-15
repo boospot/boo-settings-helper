@@ -1131,15 +1131,15 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 						$value = password_hash( $value, PASSWORD_DEFAULT );
 					}
 
-					unset( $password_get_info);
+					unset( $password_get_info );
 
 					break;
 
-//				case 'url':
-//
-//				    $value =
-//
-//					break;
+				case 'url':
+
+					$value = esc_url_raw( $value );
+
+					break;
 
 
 				default:
