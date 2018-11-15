@@ -883,7 +883,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			$name          = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
 			$dropdown_args = array(
 				'selected' => esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) ),
-				'name'     => $args['section'] . '[' . $args['id'] . ']',
+				'name'     => $name,
 				'id'       => $args['section'] . '[' . $args['id'] . ']',
 				'echo'     => 0
 			);
@@ -1139,6 +1139,16 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 					$value = esc_url_raw( $value );
 
+					break;
+
+				case 'html':
+
+					$value = ''; // nothing to save
+					break;
+
+				case 'pages':
+
+					$value = absint( $value ); // nothing to save
 					break;
 
 
