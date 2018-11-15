@@ -97,7 +97,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 //					'selectbox'    => 'no',
 //					'password'     => '',
 //					'file'         => '',
-//					'wysiwyg'      => '',
+//					'editor'      => '',
 //					'multicheck'   =>
 //						array(
 //							'one'  => 'one',
@@ -106,7 +106,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				),
 				'wedevs_advanced' => array(
 					'password'   => '121212',
-					'wysiwyg'    => '<b>whiteasd</b> <strong>clog("hello");</strong> asd asd  azxcasdfasdf dsafsd asd asd',
+					'editor'     => '<b>whiteasd</b> <strong>clog("hello");</strong> asd asd  azxcasdfasdf dsafsd asd asd',
 					'multicheck' =>
 						array(
 							'one'  => 'one',
@@ -798,7 +798,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 *
 		 * @param array $args settings field args
 		 */
-		function callback_wysiwyg( $args ) {
+		function callback_editor( $args ) {
 			$name  = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
 			$value = $this->get_option( $args['id'], $args['section'], $args['std'] );
 			$size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : '500px';
@@ -1056,14 +1056,20 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 					break;
 
-				case 'textarea':
-					// HTML and array are allowed
-//					$value = esc_textarea( $value );
+
+				case 'editor':
+
 					$value = wp_kses_post( $value );
 					break;
 
-//					TODO: checkbox 'on' state should be 1 not 'on'
+				case 'textarea':
+					// HTML and array are allowed
+//					$value = esc_textarea( $value );
+					$value = sanitize_textarea_field( $value );
+					break;
+
 				case 'checkbox':
+//					TODO: checkbox 'on' state should be 1 not 'on'
 					$value = ( $value === 'on' ) ? 'on' : 'off';
 					break;
 
@@ -1074,17 +1080,28 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 					if ( isset( $field['options'] ) && is_array( $field['options'] ) ) {
 						$value = ( in_array( $value, array_keys( $field['options'] ) ) ) ? $value : null;
-						$value = ( empty( $value ) && isset( $field['default'] ) ) ? $field['default'] : null;
+///						$this->write_log( 'value', var_export( $field['options'], true ) );
 
-//						$this->write_log( 'value', var_export( $field['options'], true ) );
-
+					} else {
+//						$field['options'] not provided
+						$value = isset( $field['default'] ) ? $field['default'] : null;
 					}
 
 
 					break;
-				// no break
-				case 'editor':
-					// no break
+
+				case 'multicheck':
+
+					if ( isset( $field['options'] ) && is_array( $field['options'] ) && is_array( $value ) ) {
+
+						$value = ( empty( array_diff( array_keys( $value ), array_keys( $field['options'] ) ) ) ) ? $value : null;
+
+					} else {
+//						$field['options'] not provided or posted data is not a part of
+						$value = isset( $field['default'] ) ? $field['default'] : null;
+					}
+
+					break;
 
 				case 'color':
 					// If string does not start with 'rgba', then treat as hex
@@ -1092,17 +1109,37 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 					if ( false === strpos( $value, 'rgba' ) ) {
 						$value = sanitize_hex_color( $value );
 						break;
+					} else {
+						// By now we know the string is formatted as an rgba color so we need to further sanitize it.
+
+						$value = trim( $value, ' ' );
+						$red   = $green = $blue = $alpha = '';
+
+						sscanf( $value, 'rgba(%d,%d,%d,%f)', $red, $green, $blue, $alpha );
+						$value = 'rgba(' . $red . ',' . $green . ',' . $blue . ',' . $alpha . ')';
 					}
 
-					// By now we know the string is formatted as an rgba color so we need to further sanitize it.
-					$value = trim( $value, ' ' );
-					$red   = $green = $blue = $alpha = '';
+					break;
 
-					sscanf( $value, 'rgba(%d,%d,%d,%f)', $red, $green, $blue, $alpha );
+				case 'password':
 
-					$value = 'rgba(' . $red . ',' . $green . ',' . $blue . ',' . $alpha . ')';
+					$password_get_info = password_get_info( $value );
+
+					if ( isset( $password_get_info['algo'] ) && $password_get_info['algo'] ) {
+						// do nothing, we have got the hashed password
+					} else {
+						$value = password_hash( $value, PASSWORD_DEFAULT );
+					}
+
+					unset( $password_get_info);
 
 					break;
+
+//				case 'url':
+//
+//				    $value =
+//
+//					break;
 
 
 				default:
