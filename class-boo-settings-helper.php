@@ -1188,9 +1188,9 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 					break;
 
 				case 'url':
-
+				    // no break
+				case 'file':
 					$value = esc_url_raw( $value );
-
 					break;
 
 				case 'html':
@@ -1204,7 +1204,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 					break;
 
 				case 'media':
-
 					$value = absint( $value ); // nothing to save
 					break;
 
@@ -1616,8 +1615,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
                         file_frame.on('select', function () {
                             attachment = file_frame.state().get('selection').first().toJSON();
-                            console.log(attachment);
-                            self.prev('.wpsa-url').val(attachment.id).change();
+                            self.prev('.wpsa-url').val(attachment.url).change();
                         });
 
                         // Finally, open the modal
