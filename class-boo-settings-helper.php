@@ -13,9 +13,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 	class Boo_Settings_Helper {
 
 		public $debug = false;
+
 		public $log = false;
 
-		public $text_domain = 'boo-helper';
+		public $text_domain = '';
 
 		public $plugin_basename = '';
 
@@ -37,7 +38,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 //		protected $options_id;
 
-//		protected $is_simple_options;
+		protected $is_simple_options;
 
 		/**
 		 * settings sections array
@@ -55,14 +56,13 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		public function __construct( $config_array = null ) {
 
-			if ( ! empty( $config_array ) ) {
+			if ( ! empty( $config_array ) && is_array( $config_array ) ) {
 
 				$this->set_properties( $config_array );
 
 			}
 
-//			$this->setup_hooks();
-
+			add_action( 'admin_init', array( $this, 'admin_init' ) );
 
 		}
 
@@ -77,6 +77,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			return array(
 				'tabs' => false,
+				'menu' => $this->get_default_config_menu(),
 //				'simple_options' => false,
 
 			);
@@ -86,34 +87,34 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		// For Debugging
 		protected function get_posted_data() {
 
-			return array(
-				'wedevs_basics'   => array(
-					'color'        => '#1e73be',
-					'number_input' => '',
-					'text_val'     => '<strong>clog("hello");</strong>this is done',
-//					'text_val'     => sanitize_text_field( '<strong>clog("hello");</strong>this is done'),
-					'textarea'     => '',
-//					'checkbox'     => 'off',
-//					'selectbox'    => 'no',
-//					'password'     => '',
-//					'file'         => '',
-//					'editor'      => '',
-//					'multicheck'   =>
+//			return array(
+//				'wedevs_basics'   => array(
+//					'color'        => '#1e73be',
+//					'number_input' => '',
+//					'text_val'     => '<strong>clog("hello");</strong>this is done',
+////					'text_val'     => sanitize_text_field( '<strong>clog("hello");</strong>this is done'),
+//					'textarea'     => '',
+////					'checkbox'     => 'off',
+////					'selectbox'    => 'no',
+////					'password'     => '',
+////					'file'         => '',
+////					'editor'      => '',
+////					'multicheck'   =>
+////						array(
+////							'one'  => 'one',
+////							'four' => 'four',
+////						),
+//				),
+//				'wedevs_advanced' => array(
+//					'password'   => '121212',
+//					'editor'     => '<b>whiteasd</b> <strong>clog("hello");</strong> asd asd  azxcasdfasdf dsafsd asd asd',
+//					'multicheck' =>
 //						array(
 //							'one'  => 'one',
 //							'four' => 'four',
 //						),
-				),
-				'wedevs_advanced' => array(
-					'password'   => '121212',
-					'editor'     => '<b>whiteasd</b> <strong>clog("hello");</strong> asd asd  azxcasdfasdf dsafsd asd asd',
-					'multicheck' =>
-						array(
-							'one'  => 'one',
-							'four' => 'four',
-						),
-				)
-			);
+//				)
+//			);
 
 
 		}
@@ -170,6 +171,15 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			}
 
 
+			$this->is_simple_options =
+				(
+					isset( $config_array['simple'] )
+					&&
+					$config_array['simple']
+				)
+					? true  // Default Value
+					: false;
+
 		}
 
 		public function set_links( array $config_links ) {
@@ -198,6 +208,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			$options_base_file_name = $this->config_menu['submenu'] ? $this->config_menu['parent'] : 'admin.php';
 
 			return admin_url( "{$options_base_file_name}?page={$this->config_menu['slug']}" );
+
 
 		}
 
@@ -236,7 +247,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				}
 				// TRUE: if Settings link is not defined, lets create one
 				if ( $this->action_links ) {
-					return array_merge( $this->get_default_settings_link(), $links );
+					return array_merge( $links, $this->get_default_settings_link() );
 				}
 
 			} // if ( is_bool( $this->config['settings_link'] ) )
@@ -307,7 +318,11 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 //			$this->config_menu = wp_parse_args( $config_menu, $this->get_default_config_menu() );
 
-			$this->slug = $this->config_menu['slug'] = isset( $this->config_menu['slug'] ) ? $this->config_menu['slug'] : sanitize_title( $config_menu['page_title'] );
+			$this->slug = $this->config_menu['slug'] =
+				isset( $this->config_menu['slug'] )
+					? sanitize_key( $this->config_menu['slug'] )
+					: sanitize_title( $config_menu['page_title'] );
+
 //			add_menu_page( 'test', 'test', 'manage_options', 'test', array( $this, 'display_page' ));
 
 			// Is it a main menu or sub_menu
@@ -329,7 +344,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				add_submenu_page(
 					$this->config_menu['parent'],
 					$this->config_menu['page_title'],
-					$this->config_menu['page_title'],
+					$this->config_menu['menu_title'],
 					$this->config_menu['capability'],
 					$this->config_menu['slug'], // slug
 					array( $this, 'display_page' )
@@ -392,7 +407,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 
 		/**
-		 * @return bool true if its menu options
+		 * @return bool true if its plugin options page is loaded
 		 */
 		protected function is_menu_page_loaded() {
 
@@ -443,16 +458,15 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			return $this;
 		}
 
-		/**
-		 * Add a single section
-		 *
-		 * @param array $section
-		 */
-		public function add_section( $section ) {
-			$this->settings_sections[] = $section;
-
-			return $this;
-		}
+//		/**
+//		 * Add a single section
+//		 *
+//		 * @param array $section
+//		 */
+//		public function add_section( $section ) {
+//			$this->settings_sections[] = $section;
+//			return $this;
+//		}
 
 		/**
 		 * Set settings fields
@@ -461,69 +475,229 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		public function set_fields( $fields ) {
 			$this->settings_fields = array_merge_recursive( $this->settings_fields, $fields );
+
+			$this->normalize_fields();
+
 			$this->setup_hooks();
 
+
 			return $this;
+
 		}
 
+		public function get_markup_placeholder( $placeholder ) {
+			return ' placeholder="' . esc_html( $placeholder ) . '" ';
+		}
 
-		function add_field( $section, $field ) {
-			$defaults = array(
-				'name'  => '',
-				'label' => '',
-				'desc'  => '',
-				'type'  => 'text'
+		public function get_markup_min( $placeholder ) {
+			return ' placeholder="' . esc_html( $placeholder ) . '" ';
+		}
+
+		public function get_markup_max( $placeholder ) {
+			return ' placeholder="' . esc_html( $placeholder ) . '" ';
+		}
+
+		public function get_markup_step( $placeholder ) {
+			return ' placeholder="' . esc_html( $placeholder ) . '" ';
+		}
+
+		public function get_sanitize_callback_name( $type ) {
+
+			switch ( $type ) :
+				case ( 'text' ):
+					return 'sanitize_text_field';
+					break;
+
+				case ( 'url' ):
+					return 'esc_url_raw';
+					break;
+
+				case ( 'number' ):
+					return 'intval';
+					break;
+//                TODO: Add more field types
+				default:
+					return 'sanitize_text_field';
+					break;
+
+			endswitch;
+
+		}
+
+		public function get_field_markup_callback_name( $type ) {
+
+			return ( method_exists( $this, "callback_{$type}" ) )
+				? array( $this, "callback_{$type}" )
+				: array( $this, "callback_text" );
+
+
+		}
+
+		public function get_default_field_args( $field, $section = 'default' ) {
+
+			$type = isset( $field['type'] ) ? $field['type'] : 'text';
+
+			return array(
+				'name'              => $field['id'],
+				'class'             => $field['id'],
+				'label_for'         => $field['id'],
+				'label'             => '',
+				'desc'              => '',
+				'section'           => $section,
+				'size'              => 'regular',
+				'options'           => array(),
+				'callback'          =>
+					( isset( $field['callback'] ) )
+						? $field['callback']
+						: $this->get_field_markup_callback_name( $type ),
+				'sanitize_callback' =>
+					( isset( $field['sanitize_callback'] ) )
+						? $field['sanitize_callback']
+						: $this->get_sanitize_callback_name( $type ),
+				'type'              => 'text',
+				'placeholder'       => '',
+				'min'               => '',
+				'max'               => '',
+				'step'              => '',
+				'value'             => '',
+				'show_in_rest'      => true,
+				'default'           => '',
+				'std'               => '',
+				'options_id'        =>
+					( ! empty( $this->options_id ) )
+						? $this->options_id
+						: str_replace( '-', '_', $this->config_menu['slug'] )
 			);
-
-			$arg = wp_parse_args( $field, $defaults );
-
-			$this->settings_fields[ $section ][] = $arg;
-
-			return $this;
 		}
+
+		public function normalize_fields() {
+
+			foreach ( $this->settings_fields as $section_id => $fields ) {
+				if ( is_array( $fields ) && ! empty( $fields ) ) {
+					foreach ( $fields as $i => $field ) {
+						$this->settings_fields[ $section_id ][ $i ] =
+							wp_parse_args(
+								$field,
+								$this->get_default_field_args( $field, $section_id )
+							);
+					}
+				}
+
+			}
+
+
+		}
+
+
+//		function add_field( $section, $field ) {
+//			$defaults = array(
+//				'name'  => '',
+//				'label' => '',
+//				'desc'  => '',
+//				'type'  => 'text'
+//			);
+//
+//			$arg = wp_parse_args( $field, $defaults );
+//
+//			$this->settings_fields[ $section ][] = $arg;
+//
+//			return $this;
+//		}
 
 		public function get_options_group() {
 			return str_replace( '-', '_', $this->slug );
 		}
 
+		function display_page() {
 
-		public function register_settings() {
+			$this->active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : $this->settings_sections[0]['id'];
+			// Save Default options in DB with default values
+//			$this->set_default_db_options();
+			settings_errors();
+			echo '<div class="wrap">';
+			echo "<h1>" . get_admin_page_title() . "</h1>";
+			if ( $this->debug ) {
+				echo "<b>TYPES of fields</b>";
+				$this->var_dump_pretty( $this->get_field_types() );
+//                delete_option( $this->options_id);
 
+				if ( $this->is_tabs ) {
+					echo "<b>Active Tab Options Array</b>";
+					$this->var_dump_pretty( get_option( $this->active_tab ) );
 
-			// creates our settings in the options table
-			foreach ( array_keys( $this->settings_fields ) as $section_id ) {
-
-				$options_group_id = ( $this->is_tabs ) ? $section_id : $this->get_options_group();
-
-				register_setting(
-					$options_group_id, // options_group
-					$section_id, // options_id
-					array(          // callback
-						$this,
-						'sanitize_options'
-					) );
+				}
 			}
+			?>
+            <div class="metabox-holder">
+				<?php
+				if ( $this->is_tabs ) {
+					$this->show_navigation();
+				}
+				?>
+                <form method="post" action="options.php">
+					<?php
 
+					foreach ( $this->settings_sections as $section ) :
+
+						//						settings_fields( $this->get_options_group() );
+
+
+						// in case of tabs, skip other section
+						if ( $this->is_tabs && $this->active_tab != $section['id'] ) {
+							continue;
+						}
+
+
+						//						if ( $this->is_tabs ) {
+						//							// for tabs
+						//							settings_fields( $section['id'] );
+						//						} else {
+						//							// for tab-less
+						//							settings_fields( $this->get_options_group() );
+						//						}
+
+						settings_fields( $this->get_options_group() );
+						do_settings_sections( $section['id'] );
+
+					endforeach; // end foreach
+
+
+					//					settings_fields( $this->get_options_group() );
+					//					do_settings_sections( 'rbr-settings-page' );
+
+
+					?>
+                    <div style="padding-left: 10px">
+						<?php submit_button(); ?>
+                    </div>
+
+                </form>
+            </div>
+			<?php
+			// Call General Scripts
+			$this->script_general();
+			?>
+            </div>
+			<?php
 		}
 
 		public function add_settings_section() {
 
 			//register settings sections
 			foreach ( $this->settings_sections as $section ) {
+
+//			    TODO: we do not need to add_option
 				if ( false == get_option( $section['id'] ) ) {
 					add_option( $section['id'] );
 				}
 
-
-//				$this->var_dump_pretty( $callback);
-//
-				if ( isset( $section['desc'] ) && ! empty( $section['desc'] ) ) {
-					$section['desc'] = '<div class="inside">' . $section['desc'] . '</div>';
-					$callback        = function () use ( $section ) {
-						echo str_replace( '"', '\"', $section['desc'] );
-					};
-				} else if ( isset( $section['callback'] ) ) {
+				// Callback for Section Description
+				if ( isset( $section['callback'] ) && is_callable( $section['callback'] ) ) {
 					$callback = $section['callback'];
+				} else if ( isset( $section['desc'] ) && ! empty( $section['desc'] ) ) {
+					$callback = function () use ( $section ) {
+						echo "<div class='inside'>" . esc_html( $section['desc'] ) . "</div>";
+					};
 				} else {
 					$callback = null;
 				}
@@ -531,58 +705,194 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 //				$this->var_dump_pretty( $callback); die();
 
 //				add_settings_section( $section['id'], $section['title'], $callback, $this->slug );
-				add_settings_section( $section['id'], $section['title'], $callback, $section['id'] );
-
+				add_settings_section(
+					$section['id'],
+					$section['title'],
+					$callback,
+					$section['id']
+				);
 
 			}
 
 		}
 
-
 		public function add_settings_field_loop() {
+			// For Simple Settings
+//			$simple_settings = true;
+//		    var_dump($this->settings_fields); die();
 
 			//register settings fields
-			foreach ( $this->settings_fields as $section => $field ) {
-				foreach ( $field as $option ) {
+			foreach ( $this->settings_fields as $section => $fields ) {
 
-					$name     = $option['name'];
-					$type     = isset( $option['type'] ) ? $option['type'] : 'text';
-					$label    = isset( $option['label'] ) ? $option['label'] : '';
-					$callback = isset( $option['callback'] ) ? $option['callback'] : array(
+				$section_options = get_option( $section );
+
+				foreach ( $fields as $field ) {
+
+					// Update Value of Field
+					if ( $this->is_simple_options ) {
+						$field['value'] = get_option( $field['id'] );
+					} else {
+						$field['value'] = isset( $section_options[ $field['id'] ] ) ? $section_options[ $field['id'] ] : '';
+					}
+
+//var_dump($option); die();
+					$type     = isset( $field['type'] ) ? $field['type'] : 'text';
+					$label    = isset( $field['label'] ) ? $field['label'] : '';
+					$callback = isset( $field['callback'] ) ? $field['callback'] : array(
 						$this,
 						'callback_' . $type
 					);
-
-					$args = array(
-						'id'                => $name,
-						'class'             => isset( $option['class'] ) ? $option['class'] : $name,
-						'label_for'         => "{$section}[{$name}]",
-						'desc'              => isset( $option['desc'] ) ? $option['desc'] : '',
-						'name'              => $label,
-						'section'           => $section,
-						'size'              => isset( $option['size'] ) ? $option['size'] : null,
-						'options'           => isset( $option['options'] ) ? $option['options'] : '',
-						'std'               => isset( $option['default'] ) ? $option['default'] : '',
-						'sanitize_callback' => isset( $option['sanitize_callback'] ) ? $option['sanitize_callback'] : '',
-						'type'              => $type,
-						'placeholder'       => isset( $option['placeholder'] ) ? $option['placeholder'] : '',
-						'min'               => isset( $option['min'] ) ? $option['min'] : '',
-						'max'               => isset( $option['max'] ) ? $option['max'] : '',
-						'step'              => isset( $option['step'] ) ? $option['step'] : '',
-						'options_id'        => ! empty( $this->options_id ) ? $this->options_id : str_replace( '-', '_', $this->config_menu['slug'] ),
-					);
+					$name     = $field['id'];
+//
+//					$args = array(
+//						'name'              => $field['id'],
+//						'id'                => $name,
+//						'class'             => isset( $field['class'] ) ? $field['class'] : $name,
+//						'label_for'         => "{$section}[{$name}]",
+//						'desc'              => isset( $field['desc'] ) ? $field['desc'] : '',
+//						'section'           => $section,
+//						'size'              => isset( $field['size'] ) ? $field['size'] : 'regular',
+//						'options'           => isset( $field['options'] ) ? $field['options'] : '',
+//						'std'               => isset( $field['default'] ) ? $field['default'] : '',
+//						'sanitize_callback' => isset( $field['sanitize_callback'] ) ? $field['sanitize_callback'] : 'sanitize_text_field',
+//						'type'              => $type,
+//						'placeholder'       => (
+//							isset( $field['placeholder'] )
+//							&&
+//							! empty( $field['placeholder'] )
+//						)
+//							? ' placeholder="' . esc_html( $field['placeholder'] ) . '"'
+//							: '',
+//						'min'               => isset( $field['min'] ) ? $field['min'] : '',
+//						'max'               => isset( $field['max'] ) ? $field['max'] : '',
+//						'step'              => isset( $option['step'] ) ? $field['step'] : '',
+//						'options_id'        => ! empty( $this->options_id ) ? $this->options_id : str_replace( '-', '_', $this->config_menu['slug'] ),
+//						'value'             => $value
+//
+//					);
 //
 //					// Update Property
 //					$this->field_types[] = $args['type'];
 
-//					add_settings_field( "{$section}[{$name}]", $label, $callback, $this->slug, $section, $args );
-					add_settings_field( "{$section}[{$name}]", $label, $callback, $section, $section, $args );
+
+//					var_dump( $name );
+					if ( $this->is_simple_options ) {
+						add_settings_field(
+							$field['id'],
+							$field['label'],
+							$field['callback'],
+							$section, // page
+							$section, // section
+							$field  // args
+						);
+//						add_settings_field( $name, $label, $callback, 'rbr-settings-page', $section, $args );
+
+					} else {
+						add_settings_field( "{$section}[{$name}]", $label, $callback, $section, $section, $field );
+					}
+
 
 				}
 			}
 
 
 		}
+
+		public function register_settings() {
+
+
+			if ( $this->is_simple_options ) {
+
+				// creates our settings in the options table
+				foreach ( $this->settings_fields as $section_id => $fields ) :
+//				$options_group_id = ( $this->is_tabs ) ? $section_id : $this->get_options_group();
+
+
+					foreach ( $fields as $field ) :
+
+//						if ( isset( $field['sanitize_callback'] ) ) {
+//							die( 'it is set' );
+//						}
+//						$this->var_export_pretty( $field );
+
+						register_setting(
+							$this->get_options_group(), // options_group
+							$field['id'], // options_id
+//							( isset( $field['sanitize_callback'] ) ) ? $field['sanitize_callback'] : ''
+//							array(
+//								'type'              => $field['type'],
+//								'description'       => $field['desc'],
+//								'sanitize_callback' => $field['sanitize_callback'],
+//								'show_in_rest'      => $field['show_in_rest'],
+//								'default'           => $field['default'],
+//							)
+//							array(          // callback
+//								$this,
+//								'sanitize_options'
+//							)
+
+                        ''
+						);
+					endforeach;
+				endforeach;
+//				die();
+			} else {
+				$loop_array = array_keys( $this->settings_fields );
+			}
+
+//			// creates our settings in the options table
+//			foreach ( $this->settings_fields as $section_id => $fields ) {
+//
+////				$options_group_id = ( $this->is_tabs ) ? $section_id : $this->get_options_group();
+//
+//				register_setting(
+//					$section_id, // options_group
+//					$section_id, // options_id
+//					array(          // callback
+//						$this,
+//						'sanitize_options'
+//					) );
+//			}
+
+		}
+
+
+		/**
+		 * Displays a text field for a settings field
+		 *
+		 * @param array $args settings field args
+		 */
+		function callback_text( $args ) {
+
+			$html = sprintf(
+				'<input 
+                        type="%1$s" 
+                        class="%2$s-number" 
+                        id="%3$s[%4$s]" 
+                        name="%10$s" 
+                        value="%5$s"
+                        %6$s
+                        %7$s
+                        %8$s
+                        %9$s
+                        />',
+				$args['type'],
+				$args['size'],
+				$args['section'],
+				$args['id'],
+				$args['value'],
+				'',
+				$args['min'],
+				$args['max'],
+				$args['step'],
+				$args['name']
+			);
+			$html .= $this->get_field_description( $args );
+
+			echo $html;
+			unset( $html);
+		}
+
 
 		/**
 		 * Initialize and registers the settings sections and fileds to WordPress
@@ -594,9 +904,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function admin_init() {
 
-			$this->register_settings();
 			$this->add_settings_section();
 			$this->add_settings_field_loop();
+			$this->register_settings();
+
 
 		}
 
@@ -606,13 +917,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		public function get_field_description( $args ) {
-			if ( ! empty( $args['desc'] ) ) {
-				$desc = sprintf( '<p class="description">%s</p>', $args['desc'] );
-			} else {
-				$desc = '';
-			}
-
-			return $desc;
+			return sprintf( '<p class="description">%s</p>', $args['desc'] );
 		}
 
 //		public function is_sections() {
@@ -632,23 +937,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		}
 
-		/**
-		 * Displays a text field for a settings field
-		 *
-		 * @param array $args settings field args
-		 */
-		function callback_text( $args ) {
-			$name        = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
-			$value       = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
-			$size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
-			$type        = isset( $args['type'] ) ? $args['type'] : 'text';
-			$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
-
-			$html = sprintf( '<input type="%1$s" class="%2$s-text" id="%3$s[%4$s]" name="%7$s" value="%5$s"%6$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder, $name );
-			$html .= $this->get_field_description( $args );
-
-			echo $html;
-		}
 
 		/**
 		 * Displays a url field for a settings field
@@ -665,19 +953,37 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		function callback_number( $args ) {
-			$name        = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
-			$value       = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
-			$size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
-			$type        = isset( $args['type'] ) ? $args['type'] : 'number';
-			$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
-			$min         = ( $args['min'] == '' ) ? '' : ' min="' . $args['min'] . '"';
-			$max         = ( $args['max'] == '' ) ? '' : ' max="' . $args['max'] . '"';
-			$step        = ( $args['step'] == '' ) ? '' : ' step="' . $args['step'] . '"';
+			$min  = ( $args['min'] == '' ) ? '' : ' min="' . $args['min'] . '"';
+			$max  = ( $args['max'] == '' ) ? '' : ' max="' . $args['max'] . '"';
+			$step = ( $args['step'] == '' ) ? '' : ' step="' . $args['step'] . '"';
 
-			$html = sprintf( '<input type="%1$s" class="%2$s-number" id="%3$s[%4$s]" name="%10$s" value="%5$s"%6$s%7$s%8$s%9$s/>', $type, $size, $args['section'], $args['id'], $value, $placeholder, $min, $max, $step, $name );
+			$html = sprintf(
+				'<input
+                        type="%1$s"
+                        class="%2$s-number"
+                        id="%3$s[%4$s]"
+                        name="%10$s"
+                        value="%5$s"
+                        %6$s
+                        %7$s
+                        %8$s
+                        %9$s
+                        />',
+				$args['type'],
+				$args['size'],
+				$args['section'],
+				$args['id'],
+				$args['value'],
+				$this->get_markup_placeholder( $args['placeholder'] ),
+				$min,
+				$max,
+				$step,
+				$args['name']
+			);
 			$html .= $this->get_field_description( $args );
-
 			echo $html;
+
+			unset( $html, $min, $max, $step );
 		}
 
 		/**
@@ -686,13 +992,13 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		function callback_checkbox( $args ) {
-			$name  = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
-			$value = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
+//			$name  = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
+//			$value = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
 
 			$html = '<fieldset>';
-			$html .= sprintf( '<label for="wpuf-%1$s[%2$s]">', $args['section'], $args['id'] );
-			$html .= sprintf( '<input type="hidden" name="%1$s" value="off" />', $name, $args['id'] );
-			$html .= sprintf( '<input type="checkbox" class="checkbox" id="wpuf-%1$s[%2$s]" name="%4$s" value="on" %3$s />', $args['section'], $args['id'], checked( $value, 'on', false ), $name );
+			$html .= sprintf( '<label for="%1$s[%2$s]">', $args['section'], $args['id'] );
+//			$html .= sprintf( '<input type="hidden" name="%1$s" value="off" />', $args['name'], $args['id'] );
+			$html .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s]" name="%4$s" value="on" %3$s />', $args['section'], $args['id'], checked( $args['value'], 'on', false ), $args['name'] );
 			$html .= sprintf( '%1$s</label>', $args['desc'] );
 			$html .= '</fieldset>';
 
@@ -706,13 +1012,14 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function callback_multicheck( $args ) {
 			$name  = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
-			$value = $this->get_option( $args['id'], $args['section'], $args['std'] );
+			$value = $args['value'];
+
 			$html  = '<fieldset>';
-			$html  .= sprintf( '<input type="hidden" name="%3$s" value="" />', $args['section'], $args['id'], $name );
+//			$html  .= sprintf( '<input type="hidden" name="%3$s" value="" />', $args['section'], $args['id'], $args['name'] );
 			foreach ( $args['options'] as $key => $label ) {
 				$checked = isset( $value[ $key ] ) ? $value[ $key ] : '0';
-				$html    .= sprintf( '<label for="wpuf-%1$s[%2$s][%3$s]">', $args['section'], $args['id'], $key );
-				$html    .= sprintf( '<input type="checkbox" class="checkbox" id="wpuf-%1$s[%2$s][%3$s]" name="%5$s[%3$s]" value="%3$s" %4$s />', $args['section'], $args['id'], $key, checked( $checked, $key, false ), $name );
+				$html    .= sprintf( '<label for="%1$s[%2$s][%3$s]">', $args['section'], $args['id'], $key );
+				$html    .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s][%3$s]" name="%5$s[%3$s]" value="%3$s" %4$s />', $args['section'], $args['id'], $key, checked( $checked, $key, false ), $args['name'] );
 				$html    .= sprintf( '%1$s</label><br>', $label );
 			}
 
@@ -771,12 +1078,21 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		function callback_textarea( $args ) {
-			$name        = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
-			$value       = esc_textarea( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
-			$size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
-			$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
+//			$name        = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
+//			$value       = esc_textarea( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
+//			$size        = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : 'regular';
+//			$placeholder = empty( $args['placeholder'] ) ? '' : ' placeholder="' . $args['placeholder'] . '"';
 
-			$html = sprintf( '<textarea rows="5" cols="55" class="%1$s-text" id="%2$s[%3$s]" name="%6$s"%4$s>%5$s</textarea>', $size, $args['section'], $args['id'], $placeholder, $value, $name );
+			$html = sprintf(
+				'<textarea 
+                        rows="5" 
+                        cols="55" 
+                        class="%1$s-text" 
+                        id="%2$s" 
+                        name="%5$s"
+                        %3$s
+                        >%4$s</textarea>',
+				$args['size'], $args['id'], $this->get_markup_placeholder( $args['placeholder'] ), $args['value'], $args['name'] );
 			$html .= $this->get_field_description( $args );
 
 			echo $html;
@@ -1321,98 +1637,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			return array();
 		}
 
-		function display_page() {
-
-			$this->active_tab = ( isset( $_GET['tab'] ) ) ? sanitize_key( $_GET['tab'] ) : $this->settings_sections[0]['id'];
-
-			// Save Default options in DB with default values
-//			$this->set_default_db_options();
-			settings_errors();
-
-
-			echo '<div class="wrap">';
-
-			if ( $this->debug ) {
-				echo "<b>TYPES of fields</b>";
-				$this->var_dump_pretty( $this->get_field_types() );
-//                delete_option( $this->options_id);
-
-				if ( $this->is_tabs ) {
-
-					echo "<b>Active Tab Options Array</b>";
-					$this->var_dump_pretty( get_option( $this->active_tab ) );
-
-				}
-			}
-
-			if ( $this->debug ) {
-				$this->var_export_pretty( $this->get_posted_data() );
-
-
-				foreach ( $this->get_posted_data() as $posted_data ) {
-
-					$clean_data = $this->sanitize_options( $posted_data );
-
-					$this->var_dump_pretty( $clean_data );
-
-				}
-			}
-
-
-			?>
-            <div class="metabox-holder">
-				<?php
-				if ( $this->is_tabs ) {
-					$this->show_navigation();
-				}
-				?>
-                <form method="post" action="options.php">
-					<?php
-
-					foreach ( $this->settings_sections as $section ) :
-
-//						settings_fields( $this->get_options_group() );
-
-						// Dont out put fields if its not the right section/tab
-//						if ( $this->active_tab != $section['id'] && $this->is_tabs ) {
-//							continue;
-//						}
-
-
-						if ( $this->is_tabs && $this->active_tab != $section['id'] ) {
-							continue;
-						}
-
-						if ( $this->is_tabs ) {
-							// for tabs
-							settings_fields( $section['id'] );
-						} else {
-							// for tab-less
-							settings_fields( $this->get_options_group() );
-						}
-
-//
-
-
-//						do_settings_sections( $section['id'] );
-						do_settings_sections( $section['id'] );
-
-					endforeach; // end foreach
-					?>
-                    <div style="padding-left: 10px">
-						<?php submit_button(); ?>
-                    </div>
-
-                </form>
-            </div>
-			<?php
-
-			$this->script_general();
-
-			echo '</div>';
-
-		}
-
 
 		/**
 		 * Show navigations as tab
@@ -1442,7 +1666,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			echo $html;
 		}
-
 
 		public function var_dump_pretty( $var ) {
 			echo "<pre>";
