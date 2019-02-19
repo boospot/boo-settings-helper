@@ -163,7 +163,20 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			$options_base_file_name = $this->config_menu['submenu'] ? $this->config_menu['parent'] : 'admin.php';
 
-			return admin_url( "{$options_base_file_name}?page={$this->config_menu['slug']}" );
+			if ( in_array( $options_base_file_name, array(
+				'options-general.php',
+				'edit-comments.php',
+                'plugins.php',
+				'edit.php',
+				'upload.php',
+				'themes.php',
+				'users.php',
+				'tools.php'
+			) ) ) {
+				return admin_url( "{$options_base_file_name}?page={$this->config_menu['slug']}" );
+			} else {
+				return admin_url( "{$options_base_file_name}&page={$this->config_menu['slug']}" );
+			}
 
 
 		}
