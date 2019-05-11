@@ -640,7 +640,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 				foreach ( $fields as $field ) :
 
-					$field['value'] = get_option( $field['name'] );
+					$field['value'] = get_option( $field['name'] , $field['default'] );
+
 
 					add_settings_field(
 						$field['name'],
