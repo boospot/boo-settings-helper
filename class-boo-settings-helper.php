@@ -36,6 +36,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		protected $sections_ids;
 
+		protected $fields_ids;
+
 		// flag for options processing
 		protected $is_settings_saved_once = false;
 
@@ -166,7 +168,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			if ( in_array( $options_base_file_name, array(
 				'options-general.php',
 				'edit-comments.php',
-                'plugins.php',
+				'plugins.php',
 				'edit.php',
 				'upload.php',
 				'themes.php',
@@ -279,11 +281,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			$this->config_menu = array_merge_recursive( $this->config_menu, wp_parse_args( $config_menu, $this->get_default_config_menu() ) );
 
-
 			$this->slug = $this->config_menu['slug'] =
 				isset( $this->config_menu['slug'] )
 					? sanitize_key( $this->config_menu['slug'] )
-					: sanitize_title( $config_menu['page_title'] );
+					: sanitize_title( $this->config_menu['page_title'] );
 
 
 			// Is it a main menu or sub_menu
@@ -1225,7 +1226,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 *
 		 * This code uses localstorage for displaying active tabs
 		 */
-		function script_general() {
+		public function script_general() {
 			?>
             <script>
                 jQuery(document).ready(function ($) {
@@ -1314,6 +1315,29 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
             </script>
 			<?php
 		}
+
+		public function get_settings_sections() {
+
+			return ( ! empty( $this->settings_sections ) ) ? $this->settings_sections : array();
+
+		}
+
+		public function get_settings_fields() {
+
+			return $this->settings_fields;
+		}
+
+		public function get_settings_fields_ids() {
+
+			foreach ( $this->settings_fields as $sections_fields ) {
+				foreach ( $sections_fields as $field ) {
+					$this->fields_ids[] = $field['id'];
+				}
+			}
+
+			return $this->fields_ids;
+		}
+
 
 	}
 
