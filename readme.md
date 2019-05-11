@@ -1,205 +1,61 @@
-# Boo Settings Helper
-This is a helper class for WordPress Settings API
+### What is it?
+This helper class lets you create the settings page for your plugin using the Wordpress Settings API without having to deal with the API directly.
+ 
+No deeper dependencies, No framework, just a light weight helper class!
 
-## Hook
+require the class, hook into `admin_menu` and pass the config array to class object to build your plugin settings page.
 
-Hook into `admin_menu`
+### Why should i use it?
+If you want to create plugin settings menu that is following WordPress best practices without having to deal with complex WorPress Settings API, then this helper class can be used. 
 
-## Sample Config Array
+The Benefits:
+* Take away the pain of dealing with Settings API
+* One config array to create everything: admin menu, settings page, sections, fields.
+* Fields input is auto sanitized
+* Can be used to make Tabs or Tab-less Settings page
+* Can be used to add plugin action links
+* Ability to override sanitization callback
+* Ability to override fields display callback  
 
-```
-	$config_array_plain = array(
-		'prefix'   => 'plugin_name_',
-		'tabs'     => true,
-		'menu'     =>
-			array(
-				'page_title' => __( 'Plugin Name Settings', 'plugin-name' ),
-				'menu_title' => __( 'Plugin Name', 'plugin-name' ),
-				'capability' => 'manage_options',
-				'slug'       => 'plugin-name',
-				'icon'       => 'dashicons-performance',
-				'position'   => 10,
-				'parent'     => 'options-general.php',
-				'submenu'    => true,
+### How to use?
 
-			),
-		'sections' =>
-			array(
-				array(
-					'id'    => 'plugin_name_general_section',
-					'title' => __( 'General Settings', 'plugin-name' ),
-					'desc'  => __( 'These are general settings for Plugin Name', 'plugin-name' ),
-//                        'callback' => function(){echo "Hi" ;}
-				),
-				array(
-					'id'    => 'plugin_name_advance_section',
-					'title' => __( 'Advanced Settings', 'plugin-name' ),
-					'desc'  => __( 'These are advance settings for Plugin Name', 'plugin-name' )
-				)
-			),
-		'fields'   => array(
-			'plugin_name_general_section' => array(
-				array(
-					'id'    => 'plugin_name_test_field',
-					'label' => __( 'Test Field', 'plugin-name' ),
-				),
-				array(
-					'id'    => 'plugin_name_url_field',
-					'label' => __( 'URL Field', 'plugin-name' ),
-					'type'  => 'url',
-				),
-				array(
-					'id'    => 'color_test',
-					'label' => __( 'Color Field', 'plugin-name' ),
-					'type'  => 'color',
-				),
-				array(
-					'id'                => 'number_field_id',
-					'label'             => __( 'Number Input', 'plugin-name' ),
-					'desc'              => __( 'Number field with validation callback `floatval`', 'plugin-name' ),
-					'placeholder'       => __( '1.99', 'plugin-name' ),
-					'min'               => 0,
-					'max'               => 99,
-					'step'              => '0.01',
-					'type'              => 'number',
-					'default'           => '50',
-					'sanitize_callback' => 'floatval'
-				),
-				array(
-					'id'          => 'textarea_field_id',
-					'label'       => __( 'Textarea Input', 'plugin-name' ),
-					'desc'        => __( 'Textarea description', 'plugin-name' ),
-					'placeholder' => __( 'Textarea placeholder', 'plugin-name' ),
-					'type'        => 'textarea'
-				),
-				array(
-					'id'   => 'html',
-					'desc' => __( 'HTML area description. You can use any <strong>bold</strong> or other HTML elements.', 'plugin-name' ),
-					'type' => 'html'
-				),
-				array(
-					'id'    => 'checkbox_field_id',
-					'label' => __( 'Checkbox', 'plugin-name' ),
-					'desc'  => __( 'Checkbox Label', 'plugin-name' ),
-					'type'  => 'checkbox',
-					''
-				),
+Complete Details can be found in the [Wiki](https://github.com/boospot/boo-settings-helper/wiki), in the nutshell, follow the steps:
+                   
+1. copy the class in plugin assets folder and require the class in your plugin files (add dependency)
+2. hook into `admin_menu` and provide a callback function
+3. in the callback function, pass the config array to this helper class object to build your sections and fields.
+ 
+Its that easy. Here is a [simple example](https://github.com/boospot/boo-settings-helper/wiki/Simple-Example) code that will create a plugin menu, 2 sections and some fields under these sections.
 
-				array(
-					'id'      => 'multi_field_id',
-					'label'   => __( 'Multicheck', 'plugin-name' ),
-					'desc'    => __( 'A radio button', 'plugin-name' ),
-					'type'    => 'multicheck',
-					'options' => array(
-						'multi_1' => 'Radio 1',
-						'multi_2' => 'Radio 2',
-						'multi_3' => 'Radio 3'
-					),
-					'default' => array(
-						'multi_1' => 'multi_1',
-						'multi_3' => 'multi_3'
-					)
-				),
-				array(
-					'id'      => 'radio_field_id',
-					'label'   => __( 'Radio Button', 'plugin-name' ),
-					'desc'    => __( 'A radio button', 'plugin-name' ),
-					'type'    => 'radio',
-					'options' => array(
-						'radio_1' => 'Radio 1',
-						'radio_2' => 'Radio 2',
-						'radio_3' => 'Radio 3'
-					),
-					'default' => array(
-						'radio_1' => 'radio_1',
-						'radio_2' => 'radio_2'
-					)
-				),
+### Example
 
-				array(
-					'id'      => 'select_field_id',
-					'label'   => __( 'A Dropdown Select', 'plugin-name' ),
-					'desc'    => __( 'Dropdown description', 'plugin-name' ),
-					'type'    => 'select',
-					'default' => 'option_2',
-					'options' => array(
-						'option_1' => 'Option 1',
-						'option_2' => 'Option 2',
-						'option_3' => 'Option 3'
-					),
-				),
+Here are two example plugins to demonstrate this class if you can figure out thing at your own:
+1. Functional / Procedural plugin example
+2. Object Oriented Plugin Example
 
-				array(
-					'id'      => 'pages_field_id',
-					'label'   => __( 'Pages Field Type', 'plugin-name' ),
-					'desc'    => __( 'List of Pages', 'plugin-name' ),
-					'type'    => 'pages',
-					'options' => array(
-						'post_type' => 'post'
-					),
-				),
 
-				array(
-					'id'      => 'posts_field_id',
-					'label'   => __( 'Posts Field Type', 'plugin-name' ),
-//						'desc'    => __( 'List of Posts', 'plugin-name' ),
-					'type'    => 'posts',
-					'options' => array(
-						'post_type' => 'post'
-					),
+### What this helper class can create?
+This helper class can create the following:
+- Plugin admin menu (top level / sub menu)
+- Settings Sections (tabbed and tab-less)
+- Settings fields under these sections
 
-				),
+### Available Field Types
 
-				array(
-					'id'      => 'password_field_id',
-					'label'   => __( 'Password Field', 'plugin-name' ),
-					'desc'    => __( 'Password description', 'plugin-name' ),
-					'type'    => 'password',
-					'default' => '',
-				),
-				array(
-					'id'      => 'file_field_id',
-					'label'   => __( 'File', 'plugin-name' ),
-					'desc'    => __( 'File description', 'plugin-name' ),
-					'type'    => 'file',
-					'default' => '',
-					'options' => array(
-						'btn' => 'Get it'
-					)
-				),
-				array(
-					'id'      => 'media_field_id',
-					'label'   => __( 'Media', 'plugin-name' ),
-					'desc'    => __( 'Media', 'plugin-name' ),
-					'type'    => 'media',
-					'default' => '',
-					'options' => array(
-						'btn'       => 'Get the image',
-						'width'     => 900,
-//							'height'    => 300,
-						'max_width' => 900
-					)
+Following Field Types can be added using this Helper Class:
 
-				)
-			),
-			'plugin_name_advance_section' => array(
-				array(
-					'id'                => 'text_field_id',
-					'label'             => __( 'Another Text', 'plugin-name' ),
-					'desc'              => __( 'with sanitize callback "absint"', 'plugin-name' ),
-					'placeholder'       => __( 'Text Input placeholder', 'plugin-name' ),
-					'type'              => 'text',
-					'default'           => '',
-					'sanitize_callback' => 'absint'
-				),
-			)
-		),
-		'links'    => array(
-			'plugin_basename' => plugin_basename( __FILE__ ),
-			'action_links'    => true,
-		),
-	);
-
-	$settings_helper = new Boo_Settings_Helper( $config_array_plain );
-
-```
+* text
+* url
+* number
+* color
+* textarea
+* radio
+* select
+* checkbox
+* multicheck
+* media
+* file
+* posts (WP posts and Custom Post Types)
+* pages (WP pages)
+* password 
+* html
