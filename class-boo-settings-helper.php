@@ -45,8 +45,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		protected $prefix = '';
 
-//		protected $options_id;
-
 		protected $is_simple_options = true;
 
 		/**
@@ -459,32 +457,27 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			return array(
 				'id'                => $field['id'],
-				'name'              => $this->prefix . $field['id'],
-				'class'             => $field['id'],
-				'label_for'         => $field['id'],
 				'label'             => '',
 				'desc'              => '',
-				'section'           => $section,
-				'size'              => 'regular',
-				'options'           => array(),
+				'type'              => 'text',
+				'placeholder'       => '',
+				'default'           => '',
+                'options'           => array(),
 				'callback'          =>
 					( isset( $field['callback'] ) )
 						? $field['callback']
 						: $this->get_field_markup_callback_name( $type ),
 				'sanitize_callback' => '',
-				'type'              => 'text',
-				'placeholder'       => '',
-//				'min'               => '',
-//				'max'               => '',
-//				'step'              => '',
 				'value'             => '',
 				'show_in_rest'      => true,
-				'default'           => '',
+				'class'             => $field['id'],
 				'std'               => '',
-				'options_id'        =>
-					( ! empty( $this->options_id ) )
-						? $this->options_id
-						: str_replace( '-', '_', $this->config_menu['slug'] )
+				'size'              => 'regular',
+				// Auto Calculated
+				'name'              => $this->prefix . $field['id'],
+				'label_for'         => $this->prefix . $field['id'],
+				'section'           => $section,
+
 			);
 		}
 
@@ -1010,34 +1003,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			echo $this->get_field_description( $args );
 		}
 
-		/**
-		 * Displays a rich text textarea for a settings field
-		 *
-		 * @param array $args settings field args
-		 */
-		function callback_editor( $args ) {
-			$name  = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
-			$value = $this->get_option( $args['id'], $args['section'], $args['std'] );
-			$size  = isset( $args['size'] ) && ! is_null( $args['size'] ) ? $args['size'] : '500px';
-
-			echo '<div style="max-width: ' . $size . ';">';
-
-			$editor_settings = array(
-				'teeny'         => true,
-				'textarea_name' => $name,
-				'textarea_rows' => 10
-			);
-
-			if ( isset( $args['options'] ) && is_array( $args['options'] ) ) {
-				$editor_settings = array_merge( $editor_settings, $args['options'] );
-			}
-
-			wp_editor( $value, $args['section'] . '-' . $args['id'], $editor_settings );
-
-			echo '</div>';
-
-			echo $this->get_field_description( $args );
-		}
 
 		/**
 		 * Displays a file upload field for a settings field
@@ -1073,8 +1038,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			$width         = isset( $args['options']['width'] ) ? absint( $args['options']['width'] ) : '';
 			$height        = isset( $args['options']['height'] ) ? absint( $args['options']['height'] ) : '';
 			$text          = isset( $args['options']['btn'] ) ? sanitize_text_field( $args['options']['btn'] ) : __( 'Upload', '' );
-//			$name          = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
-//			$args['value'] = esc_attr( $this->get_option( $args['id'], $args['section'], $args['std'] ) );
 
 
 			$image_size = ( ! empty( $width ) && ! empty( $height ) ) ? array( $width, $height ) : 'thumbnail';
@@ -1142,7 +1105,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		function callback_pages( $args ) {
-//			$name          = $this->get_field_name( $args['options_id'], $args['section'], $args['id'] );
 			$dropdown_args = array(
 				'selected' => $args['value'],
 				'name'     => $args['name'],
