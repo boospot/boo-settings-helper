@@ -598,11 +598,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 					}
 				}
 
-//			    TODO: we do not need to add_option
-				if ( false == get_option( $section['id'] ) ) {
-					add_option( $section['id'] );
-				}
-
 				// Callback for Section Description
 				if ( isset( $section['callback'] ) && is_callable( $section['callback'] ) ) {
 					$callback = $section['callback'];
@@ -614,9 +609,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 					$callback = null;
 				}
 
-//				$this->var_dump_pretty( $callback); die();
-
-//				add_settings_section( $section['id'], $section['title'], $callback, $this->slug );
 				add_settings_section(
 					$section['id'],
 					$section['title'],
@@ -643,15 +635,12 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 					$field['value'] = get_option( $field['name'], $field['default'] );
 
-
-					$field_render_callback = ( is_callable( $field['callback'] ) )
-						? $field['callback']
-						: $this->get_field_markup_callback_method( $field['type'] );
-
 					add_settings_field(
 						$field['name'],
 						$field['label'],
-						$field_render_callback,
+						( is_callable( $field['callback'] ) )
+							? $field['callback']
+							: $this->get_field_markup_callback_method( $field['type'] ),
 						$this->get_page_id_for_sections( $section_id ), // page
 						$section_id, // section
 						$field  // args
@@ -861,7 +850,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			$html = sprintf(
 				'<input
                         type="%1$s"
-                        class="%2$s-number"
+                        class="%2$s-text"
                         id="%3$s[%4$s]"
                         name="%10$s"
                         value="%5$s"
@@ -1026,7 +1015,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			$label = isset( $args['options']['btn'] )
 				? $args['options']['btn']
-				: __( 'Choose File', '' );
+				: __( 'Select' );
 
 			$html = sprintf( '<input type="url" class="%1$s-text wpsa-url" id="%2$s[%3$s]" name="%5$s" value="%4$s"/>', $args['size'], $args['section'], $args['id'], $args['value'], $args['name'] );
 			$html .= '<input type="button" class="button boospot-browse-button" value="' . $label . '" />';
@@ -1050,7 +1039,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			$max_width     = isset( $args['options']['max_width'] ) ? absint( $args['options']['max_width'] ) : 150;
 			$width         = isset( $args['options']['width'] ) ? absint( $args['options']['width'] ) : '';
 			$height        = isset( $args['options']['height'] ) ? absint( $args['options']['height'] ) : '';
-			$text          = isset( $args['options']['btn'] ) ? sanitize_text_field( $args['options']['btn'] ) : __( 'Upload', '' );
+			$text          = isset( $args['options']['btn'] ) ? sanitize_text_field( $args['options']['btn'] ) : __( 'Upload' );
 
 
 			$image_size = ( ! empty( $width ) && ! empty( $height ) ) ? array( $width, $height ) : 'thumbnail';
