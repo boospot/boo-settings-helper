@@ -442,6 +442,14 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		}
 
+		public function get_field_markup_callback_method( $type ) {
+
+			return ( method_exists( $this, "callback_{$type}" ) )
+				? array( $this, "callback_{$type}" )
+				: array( $this, "callback_text" );
+
+		}
+
 		public function get_field_markup_callback_name( $type ) {
 
 			return ( method_exists( $this, "callback_{$type}" ) )
@@ -462,11 +470,12 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				'type'              => 'text',
 				'placeholder'       => '',
 				'default'           => '',
-                'options'           => array(),
-				'callback'          =>
-					( isset( $field['callback'] ) )
-						? $field['callback']
-						: $this->get_field_markup_callback_name( $type ),
+				'options'           => array(),
+				'callback'          => '',
+//				'callback'          =>
+//					( isset( $field['callback'] ) )
+//						? $field['callback']
+//						: $this->get_field_markup_callback_name( $type ),
 				'sanitize_callback' => '',
 				'value'             => '',
 				'show_in_rest'      => true,
@@ -527,7 +536,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			if ( $this->debug ) {
 				echo "<b>TYPES of fields</b>";
 				$this->var_dump_pretty( $this->get_field_types() );
-//                delete_option( $this->options_id);
 
 				if ( $this->is_tabs ) {
 					echo "<b>Active Tab Options Array</b>";
@@ -633,13 +641,17 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 				foreach ( $fields as $field ) :
 
-					$field['value'] = get_option( $field['name'] , $field['default'] );
+					$field['value'] = get_option( $field['name'], $field['default'] );
 
+
+					$field_render_callback = ( is_callable( $field['callback'] ) )
+						? $field['callback']
+						: $this->get_field_markup_callback_method( $field['type'] );
 
 					add_settings_field(
 						$field['name'],
 						$field['label'],
-						array( $this, $field['callback'] ),
+						$field_render_callback,
 						$this->get_page_id_for_sections( $section_id ), // page
 						$section_id, // section
 						$field  // args
@@ -778,7 +790,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			$html = sprintf(
 				'<input 
                         type="%1$s" 
-                        class="%2$s-number" 
+                        class="%2$s-text %8$s" 
                         id="%3$s[%4$s]" 
                         name="%7$s" 
                         value="%5$s"
@@ -790,7 +802,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				$args['id'],
 				$args['value'],
 				$this->get_markup_placeholder( $args['placeholder'] ),
-				$args['name']
+				$args['name'],
+				$args['class']
 			);
 			$html .= $this->get_field_description( $args );
 
@@ -1015,7 +1028,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				? $args['options']['btn']
 				: __( 'Choose File', '' );
 
-			$html = sprintf( '<input type="text" class="%1$s-text wpsa-url" id="%2$s[%3$s]" name="%5$s" value="%4$s"/>', $args['size'], $args['section'], $args['id'], $args['value'], $args['name'] );
+			$html = sprintf( '<input type="url" class="%1$s-text wpsa-url" id="%2$s[%3$s]" name="%5$s" value="%4$s"/>', $args['size'], $args['section'], $args['id'], $args['value'], $args['name'] );
 			$html .= '<input type="button" class="button boospot-browse-button" value="' . $label . '" />';
 			$html .= $this->get_field_description( $args );
 
