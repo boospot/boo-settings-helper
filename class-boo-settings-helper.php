@@ -1108,10 +1108,11 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function callback_pages( $args ) {
 			$dropdown_args = array(
-				'selected' => $args['value'],
-				'name'     => $args['name'],
-				'id'       => $args['section'] . '[' . $args['id'] . ']',
-				'echo'     => 1,
+				'selected'         => $args['value'],
+				'name'             => $args['name'],
+				'id'               => $args['section'] . '[' . $args['id'] . ']',
+				'echo'             => 1,
+				'show_option_none' => '-- ' . __( 'Select' ) . ' --'
 			);
 			wp_dropdown_pages( $dropdown_args );
 
@@ -1127,7 +1128,9 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			$posts = get_posts( $posts_args );
 
-			$options = array();
+			$options = array(
+				'' => '-- ' . __( 'Select' ) . ' --'
+			);
 
 			foreach ( $posts as $post ) :
 				setup_postdata( $post );
