@@ -954,7 +954,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function callback_select( $args ) {
 
-			$html = sprintf( '<select class="%1$s" name="%4$s" id="%2$s[%3$s]">', $args['size'], $args['section'], $args['id'], $args['name'] );
+			$html = sprintf( '<select class="%1$s-text %5$s" name="%4$s" id="%2$s[%3$s]">', $args['size'], $args['section'], $args['id'], $args['name'], $args['class'] );
 
 			foreach ( $args['options'] as $key => $label ) {
 				$html .=
@@ -1107,12 +1107,15 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		function callback_pages( $args ) {
+			$size          = $args['size'];
+			$css_classes    = $args['class'];
 			$dropdown_args = array(
 				'selected'         => $args['value'],
 				'name'             => $args['name'],
 				'id'               => $args['section'] . '[' . $args['id'] . ']',
 				'echo'             => 1,
-				'show_option_none' => '-- ' . __( 'Select' ) . ' --'
+				'show_option_none' => '-- ' . __( 'Select' ) . ' --',
+				'class'            => "{$size}-text $css_classes", // string
 			);
 			wp_dropdown_pages( $dropdown_args );
 
