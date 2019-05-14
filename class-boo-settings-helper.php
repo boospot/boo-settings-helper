@@ -16,8 +16,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		public $log = false;
 
-		public $text_domain = '';
-
 		public $plugin_basename = '';
 
 		public $action_links = array();
@@ -184,7 +182,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		public function get_default_settings_link() {
 
 			return array(
-				'<a href="' . $this->get_default_settings_url() . '">' . __( 'Settings', $this->text_domain ) . '</a>',
+				'<a href="' . $this->get_default_settings_url() . '">' . __( 'Settings' ) . '</a>',
 			);
 
 		}
@@ -221,7 +219,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			if ( ! is_bool( $this->action_links ) && ! is_array( $this->action_links ) ) {
 
 				$settings_link = array(
-					'<a href="' . admin_url( esc_url( $this->action_links ) ) . '">' . __( 'Settings', $this->text_domain ) . '</a>',
+					'<a href="' . admin_url( esc_url( $this->action_links ) ) . '">' . __( 'Settings' ) . '</a>',
 				);
 
 				return array_merge( $settings_link, $links );
@@ -321,9 +319,9 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			return apply_filters( 'boo_settings_filter_default_menu_array', array(
 				//The name of this page
-				'page_title' => __( 'Plugin Options', $this->text_domain ),
+				'page_title' => __( 'Plugin Options' ),
 				// //The Menu Title in Wp Admin
-				'menu_title' => __( 'Plugin Options', $this->text_domain ),
+				'menu_title' => __( 'Plugin Options' ),
 				// The capability needed to view the page
 				'capability' => 'manage_options',
 				// dashicons id or url to icon
