@@ -470,10 +470,6 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				'default'           => '',
 				'options'           => array(),
 				'callback'          => '',
-//				'callback'          =>
-//					( isset( $field['callback'] ) )
-//						? $field['callback']
-//						: $this->get_field_markup_callback_name( $type ),
 				'sanitize_callback' => '',
 				'value'             => '',
 				'show_in_rest'      => true,
@@ -841,9 +837,9 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		function callback_number( $args ) {
-			$min  = ( isset( $args['min'] ) && ! empty( $args['min'] ) ) ? ' min="' . $args['min'] . '"' : '';
-			$max  = ( isset( $args['max'] ) && ! empty( $args['max'] ) ) ? ' max="' . $args['max'] . '"' : '';
-			$step = ( isset( $args['step'] ) && ! empty( $args['step'] ) ) ? ' step="' . $args['step'] . '"' : '';
+			$min  = ( isset( $args['options']['min'] ) && ! empty( $args['options']['min'] ) ) ? ' min="' . $args['options']['min'] . '"' : '';
+			$max  = ( isset( $args['options']['max'] ) && ! empty( $args['options']['max'] ) ) ? ' max="' . $args['options']['max'] . '"' : '';
+			$step = ( isset( $args['options']['step'] ) && ! empty( $args['options']['step'] ) ) ? ' step="' . $args['options']['step'] . '"' : '';
 
 			$html = sprintf(
 				'<input
