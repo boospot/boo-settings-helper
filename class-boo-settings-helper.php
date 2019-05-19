@@ -159,21 +159,24 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		public function get_default_settings_url() {
 
-			$options_base_file_name = $this->config_menu['submenu'] ? $this->config_menu['parent'] : 'admin.php';
-
-			if ( in_array( $options_base_file_name, array(
-				'options-general.php',
-				'edit-comments.php',
-				'plugins.php',
-				'edit.php',
-				'upload.php',
-				'themes.php',
-				'users.php',
-				'tools.php'
-			) ) ) {
-				return admin_url( "{$options_base_file_name}?page={$this->config_menu['slug']}" );
+			if ( $this->config_menu['submenu'] ) {
+				$options_base_file_name = $this->config_menu['parent'];
+				if ( in_array( $options_base_file_name, array(
+					'options-general.php',
+					'edit-comments.php',
+					'plugins.php',
+					'edit.php',
+					'upload.php',
+					'themes.php',
+					'users.php',
+					'tools.php'
+				) ) ) {
+					return admin_url( "{$options_base_file_name}?page={$this->config_menu['slug']}" );
+				} else {
+					return admin_url( "{$options_base_file_name}&page={$this->config_menu['slug']}" );
+				}
 			} else {
-				return admin_url( "{$options_base_file_name}&page={$this->config_menu['slug']}" );
+				return admin_url( "admin.php?page={$this->config_menu['slug']}" );
 			}
 
 
@@ -527,6 +530,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			echo '<div class="wrap">';
 			echo "<h1>" . get_admin_page_title() . "</h1>";
+
+			// If Debug is ON
 			if ( $this->debug ) {
 				echo "<b>TYPES of fields</b>";
 				$this->var_dump_pretty( $this->get_field_types() );
@@ -537,6 +542,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 				}
 			}
+
 			?>
             <div class="metabox-holder">
 				<?php
@@ -1102,7 +1108,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function callback_pages( $args ) {
 			$size          = $args['size'];
-			$css_classes    = $args['class'];
+			$css_classes   = $args['class'];
 			$dropdown_args = array(
 				'selected'         => $args['value'],
 				'name'             => $args['name'],
