@@ -30,7 +30,7 @@ Its that easy. Here is a [simple example](https://github.com/boospot/boo-setting
 ### Example
 
 Here are two example plugins to demonstrate this class if you can figure out thing at your own:
-1. Functional / Procedural plugin example
+1. [Functional / Procedural plugin example](https://github.com/boospot/demo-simple-plugin-to-demonstrate-settings-helper-class)
 2. Object Oriented Plugin Example
 
 
@@ -59,3 +59,5 @@ Following Field Types can be added using this Helper Class:
 * pages (WP pages)
 * password 
 * html
+
+![demo plugin settings page](http://g.recordit.co/7aRSdmprGf.gif)
