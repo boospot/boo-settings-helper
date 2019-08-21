@@ -1,0 +1,29 @@
+{
+  "name": "boospot/boo-settings-helper",
+  "type": "library",
+  "keywords": [
+    "wordpress",
+    "settings page",
+    "plugin settings",
+    "wp-admin",
+    "wordpress-plugin",
+    "plugin options"
+  ],
+  "description": "Helper class that lets you create options settings page securely and swiftly without dealing with WordPress Settings API.",
+  "homepage": "https://github.com/boospot/boo-settings-helper",
+  "license": "GPL-2.0",
+  "minimum-stability": "stable",
+  "authors": [
+    {
+      "name": "Rao Abid Ali",
+      "email": "rao@booskills.com",
+      "homepage": "https://booskills.com",
+      "role": "Developer"
+    }
+  ],
+  "autoload": {
+    "files": [
+      "class-boo-settings-helper.php"
+    ]
+  }
+}

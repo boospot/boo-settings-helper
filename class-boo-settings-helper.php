@@ -1,9 +1,9 @@
 <?php
-
 /**
- * Boo Settings API helper class
+ * Name:		Boo Settings API helper class
  *
- * @version 1.0
+ * Version:     5.1.0
+ * Author:		RaoAbid | BooSpot
  *
  * @author RaoAbid | BooSpot
  * @link https://github.com/boospot/boo-settings-helper
