@@ -1,9 +1,9 @@
 <?php
 /**
- * Name:		Boo Settings API helper class
+ * Name:        Boo Settings API helper class
  *
- * Version:     5.1.0
- * Author:		RaoAbid | BooSpot
+ * Version:     5.2
+ * Author:        RaoAbid | BooSpot
  *
  * @author RaoAbid | BooSpot
  * @link https://github.com/boospot/boo-settings-helper
@@ -700,6 +700,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			return $this->sanitize_text( $value );
 		}
 
+		function sanitize_user_role( $value ) {
+			return sanitize_key( $value );
+		}
+
 		function sanitize_radio( $value ) {
 			return $this->sanitize_text( $value );
 		}
@@ -1118,6 +1122,31 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				'class'            => "{$size}-text $css_classes", // string
 			);
 			wp_dropdown_pages( $dropdown_args );
+
+		}
+
+		/**
+		 * Displays a select box for creating the user roles
+		 *
+		 * @param array $args settings field args
+		 */
+		function callback_user_roles( $args ) {
+
+			$options        = array(
+				'' => '-- ' . __( 'Select' ) . ' --'
+			);
+			$editable_roles = get_editable_roles();
+			foreach ( $editable_roles as $role => $details ) {
+				$options[ esc_attr( $role ) ] = translate_user_role( $details['name'] );
+			}
+
+			// free memory
+			unset( $editable_roles );
+
+			//$args['options'] is required by callback_select()
+			$args['options'] = $options;
+
+			$this->callback_select( $args );
 
 		}
 
