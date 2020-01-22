@@ -393,7 +393,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				wp_enqueue_script( 'wp-color-picker' );
 			}
 
-			if ( in_array( 'media', $this->get_field_types() ) ) {
+			if ( in_array( 'media', $this->get_field_types() ) || in_array( 'file', $this->get_field_types() )  ) {
 				wp_enqueue_media();
 			}
 			wp_enqueue_script( 'jquery' );
