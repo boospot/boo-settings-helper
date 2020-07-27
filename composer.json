@@ -25,5 +25,10 @@
     "files": [
       "class-boo-settings-helper.php"
     ]
+  },
+  "extra": {
+    "branch-alias": {
+      "dev-master": "5.x-dev"
+    }
   }
 }
