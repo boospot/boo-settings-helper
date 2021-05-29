@@ -2,8 +2,8 @@
 /**
  * Name:        Boo Settings API helper class
  *
- * Version:     5.2
- * Author:        RaoAbid | BooSpot
+ * Version:     5.3
+ * Author:      RaoAbid | BooSpot
  *
  * @author RaoAbid | BooSpot
  * @link https://github.com/boospot/boo-settings-helper
@@ -173,7 +173,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				) ) ) {
 					return admin_url( "{$options_base_file_name}?page={$this->config_menu['slug']}" );
 				} else {
-					return admin_url( "{$options_base_file_name}&page={$this->config_menu['slug']}" );
+					return admin_url( "admin.php?page={$this->config_menu['slug']}" );
 				}
 			} else {
 				return admin_url( "admin.php?page={$this->config_menu['slug']}" );
