@@ -17,13 +17,23 @@ The Benefits:
 * Ability to override sanitization callback
 * Ability to override fields display callback  
 
-### How to use?
+### Installation
 
-Complete Details can be found in the [Wiki](https://github.com/boospot/boo-settings-helper/wiki), in the nutshell, follow the steps:
-                   
+#### Via Composer (Recommended)
+```bash
+composer require boospot/boo-settings-helper
+```
+
+Or visit the [Packagist page](https://packagist.org/packages/boospot/boo-settings-helper) for more installation options and version information.
+
+#### Manual Installation
 1. copy the class in plugin assets folder and require the class in your plugin files (add dependency)
 2. hook into `admin_menu` and provide a callback function
 3. in the callback function, pass the config array to this helper class object to build your sections and fields.
+
+### How to use?
+
+Complete Details can be found in the [Wiki](https://github.com/boospot/boo-settings-helper/wiki), in the nutshell, follow the steps above for installation, then:
  
 Its that easy. Here is a [simple example](https://github.com/boospot/boo-settings-helper/wiki/Simple-Example) code that will create a plugin menu, 2 sections and some fields under these sections.
 
