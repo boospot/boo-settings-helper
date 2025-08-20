@@ -847,12 +847,12 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		function callback_number( $args ) {
-			$min  = ( isset( $args['options']['min'] ) && ! empty( $args['options']['min'] ) ) ? ' min="' . $args['options']['min'] . '"' : '';
-			$max  = ( isset( $args['options']['max'] ) && ! empty( $args['options']['max'] ) ) ? ' max="' . $args['options']['max'] . '"' : '';
-			$step = ( isset( $args['options']['step'] ) && ! empty( $args['options']['step'] ) ) ? ' step="' . $args['options']['step'] . '"' : '';
+					$min  = ( isset( $args['options']['min'] ) && ! empty( $args['options']['min'] ) ) ? ' min="' . esc_attr( $args['options']['min'] ) . '"' : '';
+		$max  = ( isset( $args['options']['max'] ) && ! empty( $args['options']['max'] ) ) ? ' max="' . esc_attr( $args['options']['max'] ) . '"' : '';
+		$step = ( isset( $args['options']['step'] ) && ! empty( $args['options']['step'] ) ) ? ' step="' . esc_attr( $args['options']['step'] ) . '"' : '';
 
-			$html = sprintf(
-				'<input
+		$html = sprintf(
+			'<input
                         type="%1$s"
                         class="%2$s-text"
                         id="%3$s[%4$s]"
@@ -863,17 +863,17 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                         %8$s
                         %9$s
                         />',
-				$args['type'],
-				$args['size'],
-				$args['section'],
-				$args['id'],
-				$args['value'],
-				$this->get_markup_placeholder( $args['placeholder'] ),
-				$min,
-				$max,
-				$step,
-				$args['name']
-			);
+			esc_attr( $args['type'] ),
+			esc_attr( $args['size'] ),
+			esc_attr( $args['section'] ),
+			esc_attr( $args['id'] ),
+			esc_attr( $args['value'] ),
+			$this->get_markup_placeholder( $args['placeholder'] ),
+			$min,
+			$max,
+			$step,
+			esc_attr( $args['name'] )
+		);
 			$html .= $this->get_field_description( $args );
 			echo $html;
 
@@ -888,11 +888,11 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		function callback_checkbox( $args ) {
 
 
-			$html = '<fieldset>';
-			$html .= sprintf( '<label for="%1$s[%2$s]">', $args['section'], $args['id'] );
-			$html .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s]" name="%4$s" value="1" %3$s />', $args['section'], $args['id'], checked( $args['value'], '1', false ), $args['name'] );
-			$html .= sprintf( '%1$s</label>', $args['desc'] );
-			$html .= '</fieldset>';
+					$html = '<fieldset>';
+		$html .= sprintf( '<label for="%1$s[%2$s]">', esc_attr( $args['section'] ), esc_attr( $args['id'] ) );
+		$html .= sprintf( '<input type="checkbox" class="checkbox" id="%1$s[%2$s]" name="%4$s" value="1" %3$s />', esc_attr( $args['section'] ), esc_attr( $args['id'] ), checked( $args['value'], '1', false ), esc_attr( $args['name'] ) );
+		$html .= sprintf( '%1$s</label>', esc_html( $args['desc'] ) );
+		$html .= '</fieldset>';
 
 			echo $html;
 		}
@@ -937,12 +937,12 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			$html = '<fieldset>';
 
-			foreach ( $args['options'] as $key => $label ) {
+					foreach ( $args['options'] as $key => $label ) {
 
-				$html .= sprintf( '<label for="%1$s[%2$s][%3$s]">', $args['section'], $args['id'], $key );
-				$html .= sprintf( '<input type="radio" class="radio" id="%1$s[%2$s][%3$s]" name="%5$s" value="%3$s" %4$s />', $args['section'], $args['id'], $key, checked( $args['value'], $key, false ), $args['name'] );
-				$html .= sprintf( '%1$s</label><br>', $label );
-			}
+			$html .= sprintf( '<label for="%1$s[%2$s][%3$s]">', esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( $key ) );
+			$html .= sprintf( '<input type="radio" class="radio" id="%1$s[%2$s][%3$s]" name="%5$s" value="%3$s" %4$s />', esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( $key ), checked( $args['value'], $key, false ), esc_attr( $args['name'] ) );
+			$html .= sprintf( '%1$s</label><br>', esc_html( $label ) );
+		}
 
 			$html .= $this->get_field_description( $args );
 			$html .= '</fieldset>';
@@ -958,16 +958,16 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function callback_select( $args ) {
 
-			$html = sprintf( '<select class="%1$s-text %5$s" name="%4$s" id="%2$s[%3$s]">', $args['size'], $args['section'], $args['id'], $args['name'], $args['class'] );
+					$html = sprintf( '<select class="%1$s-text %5$s" name="%4$s" id="%2$s[%3$s]">', esc_attr( $args['size'] ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( $args['name'] ), esc_attr( $args['class'] ) );
 
-			foreach ( $args['options'] as $key => $label ) {
-				$html .=
-					sprintf( '<option value="%1s"%2s>%3s</option>',
-						$key,
-						selected( $args['value'], $key, false ),
-						$label
-					);
-			}
+		foreach ( $args['options'] as $key => $label ) {
+			$html .=
+				sprintf( '<option value="%1s"%2s>%3s</option>',
+					esc_attr( $key ),
+					selected( $args['value'], $key, false ),
+					esc_html( $label )
+				);
+		}
 
 			$html .= sprintf( '</select>' );
 			$html .= $this->get_field_description( $args );
