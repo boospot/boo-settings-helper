@@ -221,9 +221,9 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			// Admin URL of settings is given
 			if ( ! is_bool( $this->action_links ) && ! is_array( $this->action_links ) ) {
 
-				$settings_link = array(
-					'<a href="' . admin_url( esc_url( $this->action_links ) ) . '">' . __( 'Settings' ) . '</a>',
-				);
+							$settings_link = array(
+				'<a href="' . esc_url( admin_url( $this->action_links ) ) . '">' . esc_html( __( 'Settings' ) ) . '</a>',
+			);
 
 				return array_merge( $settings_link, $links );
 			}
@@ -255,7 +255,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 					}
 
-					$settings_link_array[] = '<a href="' . $link_url . '">' . $link_text . '</a>';
+					$settings_link_array[] = '<a href="' . esc_url( $link_url ) . '">' . esc_html( $link_text ) . '</a>';
 
 				}
 
@@ -1086,7 +1086,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function callback_password( $args ) {
 
-			$html = sprintf( '<input type="password" class="%1$s-text" id="%2$s[%3$s]" name="%5$s" value="%4$s"/>', $args['size'], $args['section'], $args['id'], $args['value'], $args['name'] );
+			$html = sprintf( '<input type="password" class="%1$s-text" id="%2$s[%3$s]" name="%5$s" value="" placeholder="%4$s"/>', esc_attr( $args['size'] ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( __( 'Leave blank to keep existing' ) ), esc_attr( $args['name'] ) );
 			$html .= $this->get_field_description( $args );
 
 			echo $html;
@@ -1098,7 +1098,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $args settings field args
 		 */
 		function callback_color( $args ) {
-			$html = sprintf( '<input type="text" class="%1$s-text wp-color-picker-field" data-alpha="true" id="%2$s[%3$s]" name="%6$s" value="%4$s" data-default-color="%5$s" />', $args['size'], $args['section'], $args['id'], $args['value'], $args['default'], $args['name'] );
+			$html = sprintf( '<input type="text" class="%1$s-text wp-color-picker-field" data-alpha="true" id="%2$s[%3$s]" name="%6$s" value="%4$s" data-default-color="%5$s" />', esc_attr( $args['size'] ), esc_attr( $args['section'] ), esc_attr( $args['id'] ), esc_attr( $args['value'] ), esc_attr( $args['default'] ), esc_attr( $args['name'] ) );
 			$html .= $this->get_field_description( $args );
 
 			echo $html;
@@ -1199,10 +1199,10 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 			$html = '<h2 class="nav-tab-wrapper">';
 
-			foreach ( $this->settings_sections as $tab ) {
-				$active_class = ( $tab['id'] == $this->active_tab ) ? 'nav-tab-active' : '';
-				$html         .= sprintf( '<a href="%3$s&tab=%1$s" class="nav-tab %4$s" id="%1$s-tab">%2$s</a>', $tab['id'], $tab['title'], $settings_page, $active_class );
-			}
+					foreach ( $this->settings_sections as $tab ) {
+			$active_class = ( $tab['id'] == $this->active_tab ) ? 'nav-tab-active' : '';
+			$html         .= sprintf( '<a href="%3$s&tab=%1$s" class="nav-tab %4$s" id="%1$s-tab">%2$s</a>', esc_attr( $tab['id'] ), esc_html( $tab['title'] ), esc_url( $settings_page ), esc_attr( $active_class ) );
+		}
 
 			$html .= '</h2>';
 
