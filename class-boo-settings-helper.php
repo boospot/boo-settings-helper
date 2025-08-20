@@ -2,7 +2,7 @@
 /**
  * Name:        Boo Settings API helper class
  *
- * Version:     5.3
+ * Version:     5.4
  * Author:      RaoAbid | BooSpot
  *
  * @author RaoAbid | BooSpot
@@ -26,15 +26,15 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		protected $is_tabs = false;
 
-		public $slug;
+			public $slug = '';
 
-		protected $active_tab;
+	protected $active_tab = '';
 
-		protected $sections_count;
+	protected $sections_count = 0;
 
-		protected $sections_ids;
+	protected $sections_ids = array();
 
-		protected $fields_ids;
+	protected $fields_ids = array();
 
 		// flag for options processing
 		protected $is_settings_saved_once = false;
@@ -278,7 +278,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		public function set_menu( $config_menu ) {
 
-			$this->config_menu = array_merge_recursive( $this->config_menu, wp_parse_args( $config_menu, $this->get_default_config_menu() ) );
+			$this->config_menu = array_replace_recursive( $this->config_menu, wp_parse_args( $config_menu, $this->get_default_config_menu() ) );
 
 			$this->slug = $this->config_menu['slug'] =
 				isset( $this->config_menu['slug'] )
@@ -341,13 +341,21 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		}
 
 		//DEBUG
-		public function write_log( $type, $log_line ) {
+			public function write_log( $type, $log_line ) {
 
-			$hash        = '';
-			$fn          = plugin_dir_path( __FILE__ ) . '/' . $type . '-' . $hash . '.log';
-			$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
-
+		$upload_dir = wp_upload_dir();
+		$log_dir = trailingslashit( $upload_dir['basedir'] ) . 'boo-settings-helper/';
+		
+		// Create directory if it doesn't exist
+		if ( ! file_exists( $log_dir ) ) {
+			wp_mkdir_p( $log_dir );
 		}
+		
+		$hash        = '';
+		$fn          = $log_dir . sanitize_file_name( $type . '-' . $hash . '.log' );
+		$log_in_file = file_put_contents( $fn, date( 'Y-m-d H:i:s' ) . ' - ' . $log_line . PHP_EOL, FILE_APPEND );
+
+	}
 
 		/*
 		 * @return array configured field types
@@ -407,7 +415,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function set_sections( array $sections ) {
 
-			$this->settings_sections = array_merge_recursive( $this->settings_sections, $sections );
+			$this->settings_sections = array_replace_recursive( $this->settings_sections, $sections );
 
 			$this->sections_count = count( $this->settings_sections );
 
@@ -422,7 +430,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 * @param array $fields settings fields array
 		 */
 		public function set_fields( $fields ) {
-			$this->settings_fields = array_merge_recursive( $this->settings_fields, $fields );
+			$this->settings_fields = array_replace_recursive( $this->settings_fields, $fields );
 			$this->normalize_fields();
 			$this->setup_hooks();
 
