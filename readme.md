@@ -17,19 +17,46 @@ The Benefits:
 * Ability to override sanitization callback
 * Ability to override fields display callback  
 
+### Requirements
+
+- PHP 7.4 or higher
+- WordPress 5.8 or higher
+
 ### Installation
 
 #### Via Composer (Recommended)
+
+**Basic Installation:**
 ```bash
 composer require boospot/boo-settings-helper
 ```
 
+**For WordPress Plugins (composer.json example):**
+```json
+{
+  "require": {
+    "php": ">=7.4",
+    "boospot/boo-settings-helper": "^5.4"
+  },
+  "autoload": {
+    "files": [
+      "vendor/boospot/boo-settings-helper/class-boo-settings-helper.php"
+    ]
+  }
+}
+```
+
+**Version Constraints:**
+- `"^5.4"` - Latest compatible version (recommended for security fixes)
+- `"5.4.*"` - Specific 5.4.x versions only
+- `"~5.4.0"` - 5.4.0 and patch versions only
+
 Or visit the [Packagist page](https://packagist.org/packages/boospot/boo-settings-helper) for more installation options and version information.
 
 #### Manual Installation
-1. copy the class in plugin assets folder and require the class in your plugin files (add dependency)
-2. hook into `admin_menu` and provide a callback function
-3. in the callback function, pass the config array to this helper class object to build your sections and fields.
+1. Download the `class-boo-settings-helper.php` file
+2. Copy the class file to your plugin's assets or includes folder
+3. Require the class in your plugin files: `require_once 'path/to/class-boo-settings-helper.php';`
 
 ### How to use?
 
