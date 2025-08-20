@@ -475,7 +475,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 				'callback'          => '',
 				'sanitize_callback' => '',
 				'value'             => '',
-				'show_in_rest'      => true,
+				'show_in_rest'      => false,
 				'class'             => $field['id'],
 				'std'               => '',
 				'size'              => 'regular',
@@ -780,8 +780,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function callback_text( $args ) {
 
-			$html = sprintf(
-				'<input 
+					$html = sprintf(
+			'<input 
                         type="%1$s" 
                         class="%2$s-text %8$s" 
                         id="%3$s[%4$s]" 
@@ -789,15 +789,15 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                         value="%5$s"
                         %6$s
                         />',
-				$args['type'],
-				$args['size'],
-				$args['section'],
-				$args['id'],
-				$args['value'],
-				$this->get_markup_placeholder( $args['placeholder'] ),
-				$args['name'],
-				$args['class']
-			);
+			esc_attr( $args['type'] ),
+			esc_attr( $args['size'] ),
+			esc_attr( $args['section'] ),
+			esc_attr( $args['id'] ),
+			esc_attr( $args['value'] ),
+			$this->get_markup_placeholder( $args['placeholder'] ),
+			esc_attr( $args['name'] ),
+			esc_attr( $args['class'] )
+		);
 			$html .= $this->get_field_description( $args );
 
 			echo $html;
@@ -827,9 +827,9 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 *
 		 * @param array $args settings field args
 		 */
-		public function get_field_description( $args ) {
-			return sprintf( '<p class="description">%s</p>', $args['desc'] );
-		}
+			public function get_field_description( $args ) {
+		return sprintf( '<p class="description">%s</p>', wp_kses_post( $args['desc'] ) );
+	}
 
 
 		/**
@@ -983,8 +983,8 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 		 */
 		function callback_textarea( $args ) {
 
-			$html = sprintf(
-				'<textarea 
+					$html = sprintf(
+			'<textarea 
                         rows="5" 
                         cols="55" 
                         class="%1$s-text" 
@@ -992,7 +992,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                         name="%5$s"
                         %3$s
                         >%4$s</textarea>',
-				$args['size'], $args['id'], $this->get_markup_placeholder( $args['placeholder'] ), $args['value'], $args['name'] );
+			esc_attr( $args['size'] ), esc_attr( $args['id'] ), $this->get_markup_placeholder( $args['placeholder'] ), esc_textarea( $args['value'] ), esc_attr( $args['name'] ) );
 			$html .= $this->get_field_description( $args );
 
 			echo $html;
@@ -1072,7 +1072,7 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
                 </div>
             ';
 
-			$this->get_field_description( $args );
+			echo $this->get_field_description( $args );
 
 			// free memory
 			unset( $default_image, $max_width, $width, $height, $text, $image_size, $image_style, $value );
