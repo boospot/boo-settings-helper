@@ -61,3 +61,41 @@ Following Field Types can be added using this Helper Class:
 * html
 
 ![demo plugin settings page](http://g.recordit.co/7aRSdmprGf.gif)
+
+## Security & Updates
+
+### Version 5.4 - Security Fixes (January 2025)
+
+This version addresses multiple security vulnerabilities while maintaining 100% backward compatibility.
+
+#### Security Improvements:
+- **XSS Prevention**: Fixed output escaping in all callback methods (text, textarea, select, checkbox, radio, number, color)
+- **Password Security**: Eliminated hash leakage - password fields no longer display stored values
+- **REST API Security**: Changed default `show_in_rest` from `true` to `false` to reduce attack surface
+- **HTML Security**: Added proper escaping for navigation tabs, action links, and field descriptions
+- **Log Security**: Moved log files from plugin directory to secure WordPress uploads directory
+
+#### Infrastructure Improvements:
+- **PHP 8.2 Compatibility**: Added proper property declarations with default values
+- **Bug Fixes**: Added missing echo in callback_media() method, improved array handling
+- **Enhanced Security**: All user-facing output now properly escaped using WordPress functions
+
+#### Backward Compatibility:
+- Zero breaking changes to public API or method signatures
+- 100% compatible with existing plugins using this helper
+- Safe upgrade path - existing implementations continue to work without modification
+- No changes to text domains or translation compatibility
+
+## Changelog
+
+### v5.4 (January 2025)
+- SECURITY: Fixed multiple XSS vulnerabilities in form callbacks
+- SECURITY: Eliminated password hash leakage in HTML output
+- SECURITY: Changed REST API exposure default to false
+- SECURITY: Moved log files to secure location
+- IMPROVEMENT: Added PHP 8.2 compatibility
+- BUGFIX: Added missing echo in callback_media() description
+- IMPROVEMENT: Enhanced array handling with array_replace_recursive()
+
+### v5.3 (Current stable)
+- Base version with existing functionality
