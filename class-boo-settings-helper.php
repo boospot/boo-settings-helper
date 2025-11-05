@@ -2,7 +2,7 @@
 /**
  * Name:        Boo Settings API helper class
  *
- * Version:     5.4
+ * Version:     5.4.1
  * Author:      RaoAbid | BooSpot
  *
  * @author RaoAbid | BooSpot
@@ -468,32 +468,33 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 
 		}
 
-		public function get_default_field_args( $field, $section = 'default' ) {
+	public function get_default_field_args( $field, $section = 'default' ) {
 
-			$type = isset( $field['type'] ) ? $field['type'] : 'text';
+		$type = isset( $field['type'] ) ? $field['type'] : 'text';
+		$field_id = isset( $field['id'] ) ? $field['id'] : '';
 
-			return array(
-				'id'                => $field['id'],
-				'label'             => '',
-				'desc'              => '',
-				'type'              => 'text',
-				'placeholder'       => '',
-				'default'           => '',
-				'options'           => array(),
-				'callback'          => '',
-				'sanitize_callback' => '',
-				'value'             => '',
-				'show_in_rest'      => false,
-				'class'             => $field['id'],
-				'std'               => '',
-				'size'              => 'regular',
-				// Auto Calculated
-				'name'              => $this->prefix . $field['id'],
-				'label_for'         => $this->prefix . $field['id'],
-				'section'           => $section,
+		return array(
+			'id'                => $field_id,
+			'label'             => '',
+			'desc'              => '',
+			'type'              => 'text',
+			'placeholder'       => '',
+			'default'           => '',
+			'options'           => array(),
+			'callback'          => '',
+			'sanitize_callback' => '',
+			'value'             => '',
+			'show_in_rest'      => false,
+			'class'             => $field_id,
+			'std'               => '',
+			'size'              => 'regular',
+			// Auto Calculated
+			'name'              => $this->prefix . $field_id,
+			'label_for'         => $this->prefix . $field_id,
+			'section'           => $section,
 
-			);
-		}
+		);
+	}
 
 		public function normalize_fields() {
 
@@ -1335,16 +1336,18 @@ if ( ! class_exists( 'Boo_Settings_Helper' ) ):
 			return $this->settings_fields;
 		}
 
-		public function get_settings_fields_ids() {
+	public function get_settings_fields_ids() {
 
-			foreach ( $this->settings_fields as $sections_fields ) {
-				foreach ( $sections_fields as $field ) {
+		foreach ( $this->settings_fields as $sections_fields ) {
+			foreach ( $sections_fields as $field ) {
+				if ( isset( $field['id'] ) ) {
 					$this->fields_ids[] = $field['id'];
 				}
 			}
-
-			return $this->fields_ids;
 		}
+
+		return $this->fields_ids;
+	}
 
 
 	}
