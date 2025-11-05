@@ -48,8 +48,8 @@ composer require boospot/boo-settings-helper
 
 **Version Constraints:**
 - `"^5.4"` - Latest compatible version (recommended for security fixes)
-- `"5.4.*"` - Specific 5.4.x versions only
-- `"~5.4.0"` - 5.4.0 and patch versions only
+- `"5.4.*"` - Specific 5.4.x versions only  
+- `"~5.4.1"` - 5.4.1 and patch versions only (latest bug fixes)
 
 Or visit the [Packagist page](https://packagist.org/packages/boospot/boo-settings-helper) for more installation options and version information.
 
@@ -101,6 +101,22 @@ Following Field Types can be added using this Helper Class:
 
 ## Security & Updates
 
+### Version 5.4.1 - Bug Fix Release (November 2025)
+
+This patch release fixes critical PHP 8+ compatibility issues while maintaining 100% backward compatibility.
+
+#### Bug Fixes:
+- **PHP 8+ Compatibility**: Fixed "Undefined array key 'id'" warnings in field processing
+- **Defensive Programming**: Added `isset()` checks before accessing `$field['id']` in all methods
+- **Error Prevention**: Graceful handling of incomplete field definitions passed by plugins
+- **Production Ready**: Eliminates PHP warnings in production environments
+
+#### Technical Changes:
+- Fixed `get_default_field_args()` method to handle missing 'id' keys (lines 476, 487, 491, 492)
+- Fixed `get_settings_fields_ids()` method to validate field structure (line 1343)
+- Added fallback to empty string for missing field IDs
+- Maintained all existing functionality and API compatibility
+
 ### Version 5.4 - Security Fixes (January 2025)
 
 This version addresses multiple security vulnerabilities while maintaining 100% backward compatibility.
@@ -125,6 +141,14 @@ This version addresses multiple security vulnerabilities while maintaining 100% 
 
 ## Changelog
 
+### v5.4.1 (November 2025)
+- BUGFIX: Fixed "Undefined array key 'id'" warnings in PHP 8+
+- BUGFIX: Added defensive `isset()` checks in `get_default_field_args()`
+- BUGFIX: Added defensive `isset()` checks in `get_settings_fields_ids()`
+- IMPROVEMENT: Graceful handling of incomplete field definitions
+- IMPROVEMENT: Enhanced error prevention for production environments
+- COMPATIBILITY: 100% backward compatible with existing plugins
+
 ### v5.4 (January 2025)
 - SECURITY: Fixed multiple XSS vulnerabilities in form callbacks
 - SECURITY: Eliminated password hash leakage in HTML output
@@ -134,5 +158,5 @@ This version addresses multiple security vulnerabilities while maintaining 100% 
 - BUGFIX: Added missing echo in callback_media() description
 - IMPROVEMENT: Enhanced array handling with array_replace_recursive()
 
-### v5.3 (Current stable)
+### v5.3 (Previous stable)
 - Base version with existing functionality
